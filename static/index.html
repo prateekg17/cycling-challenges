@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@300;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/cards.css">
     <link rel="stylesheet" href="css/table.css">
@@ -22,22 +23,32 @@
             </a>
         </div>
     </header>
-    <nav class="challenge-tabs">
-        <div class="challenge-tabs-list">
-            <button type="button" class="challenge-tab active">Tube Terminus Challenge</button>
+
+    <!-- Home screen: challenge tile grid -->
+    <main id="home-screen" hidden>
+        <!-- Populated by renderHomeScreen() in script.js -->
+    </main>
+
+    <!-- Challenge detail: back-link row (shown only in detail view) -->
+    <div id="challenge-detail-nav" class="challenge-tabs" role="navigation" aria-label="Challenge navigation" hidden>
+        <div class="challenge-detail-header">
+            <button type="button" class="back-link" id="back-to-challenges">&#8592; All Challenges</button>
+            <span class="detail-header-sep">|</span>
+            <span class="challenge-detail-title" id="challenge-detail-title"></span>
         </div>
+        <div class="challenge-tabs-list" style="display:none;"></div>
         <span class="view-toggle"><button id="toggle-table-view"></button></span>
-    </nav>
-    <main>
+    </div>
+
+    <!-- Challenge detail: activity content -->
+    <main id="challenge-detail" hidden>
         <section id="activities" style="margin-top:2em;"></section>
         <section id="table-view" style="margin-top:2em;"></section>
     </main>
+
     <footer class="site-footer">
         <div class="site-footer-content">
             <span class="site-footer-attribution">Built by Prateek</span>
-            <a class="follow-strava" href="https://www.strava.com/athletes/111956132" target="_blank" rel="noopener noreferrer">
-                Follow me on Strava
-            </a>
         </div>
     </footer>
     <script src="script.js"></script>

@@ -155,8 +155,8 @@ async function main() {
         const filteredActivities = filterAndSortActivities(allActivities);
         console.log(`Filtered to ${filteredActivities.length} activities with "terminus" keyword`);
 
-        // Save to static/activities.json
-        const outputPath = join(__dirname, '..', 'static', 'activities.json');
+        // Save to static/activities-terminus.json
+        const outputPath = join(__dirname, '..', 'static', 'activities-terminus.json');
         writeFileSync(outputPath, JSON.stringify(filteredActivities, null, 2));
         console.log(`Activities saved to ${outputPath}`);
 
