@@ -53,6 +53,9 @@ const elements = {
 /** @type {Activity[]} */
 let activitiesData = [];
 
+/** @type {AbortController|null} - cancels any in-flight fetchActivities call */
+let currentFetchController = null;
+
 // ---------------------------------------------------------------------------
 // View management
 // ---------------------------------------------------------------------------
@@ -129,6 +132,12 @@ function router() {
     showView('challenge');
     elements.detailTitle.textContent = challenge.name;
 
+    // Cancel any in-flight fetch from a previous navigation
+    if (currentFetchController) {
+        currentFetchController.abort();
+        currentFetchController = null;
+    }
+
     // Reset data state and reload for this challenge
     activitiesData = [];
     tableSort = { column: null, asc: true };
@@ -137,7 +146,7 @@ function router() {
     elements.tableView.innerHTML = '';
     elements.activities.style.display = 'none';
     elements.tableView.style.display = 'none';
-    elements.viewToggle.style.display = 'none';
+    elements.viewToggle.style.display = ''; // clear any leftover inline style; parent hidden attr controls visibility
 
     void fetchActivities(challenge.dataFile);
 }
@@ -156,7 +165,7 @@ window.addEventListener('hashchange', router);
 
 // Helper function to show the activities view
 function showActivitiesView() {
-    elements.viewToggle.style.display = 'block';
+    elements.viewToggle.style.display = '';    // remove any inline override; parent is already visible
     elements.toggleBtn.style.display = '';
 }
 
@@ -165,12 +174,14 @@ function showActivitiesView() {
  * @param {string} dataFile - Filename inside static/ e.g. 'activities-terminus.json'
  */
 async function fetchActivities(dataFile) {
+    const controller = new AbortController();
+    currentFetchController = controller;
     elements.activities.style.display = 'none';
     elements.tableView.style.display = 'none';
     elements.activities.innerHTML = '';
 
     try {
-        const res = await fetch('./' + dataFile);
+        const res = await fetch('./' + dataFile, { signal: controller.signal });
         if (!res.ok) throw new Error(`Failed to load activities: ${res.status}`);
 
         showActivitiesView();
@@ -180,7 +191,7 @@ async function fetchActivities(dataFile) {
 
         if (activities.length === 0) {
             elements.activities.innerHTML = '<p>No activities found for this challenge.</p>';
-            elements.viewToggle.style.display = 'none';
+            elements.toggleBtn.style.display = 'none'; // no activities, hide the toggle button
             elements.activities.style.display = 'grid';
             return;
         }
@@ -202,10 +213,11 @@ async function fetchActivities(dataFile) {
         }
 
     } catch (error) {
+        if (error.name === 'AbortError') return; // navigation cancelled this fetch
         console.error('Error loading activities:', error);
         elements.activities.innerHTML = '<p>Error loading activities. Please try again later.</p>';
         elements.activities.style.display = 'grid';
-        elements.viewToggle.style.display = 'none';
+        elements.toggleBtn.style.display = 'none'; // hide toggle on error
     }
 }
 
