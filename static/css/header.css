@@ -174,7 +174,7 @@
 }
 
 .detail-header-sep {
-    color: var(--border);
+    color: var(--text-secondary);
     font-size: 1rem;
     flex-shrink: 0;
     user-select: none;
