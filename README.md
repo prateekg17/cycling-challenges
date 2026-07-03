@@ -136,7 +136,7 @@ The web UI displays:
 - `.github/workflows/test.yaml` – PR test CI
 - `scripts/fetch-activities.ts` – Strava fetch & processing (ESM / NodeNext)
 - `scripts/fetch-activities.test.ts` – Unit tests (Vitest, mocked fetch)
-- `static/` – Site assets (`index.html`, `css/` (five CSS modules), `script.js`, `activities-terminus.json`, images)
+- `static/` – Site assets (`index.html`, `css/` (six CSS modules), `script.js`, `activities-terminus.json`, images)
 - `package.json` – Dependencies & scripts
 - `tsconfig.json` – TypeScript config (ES2022 target, NodeNext resolution)
 

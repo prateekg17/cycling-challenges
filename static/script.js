@@ -97,7 +97,7 @@ function renderHomeScreen() {
                     <div class="challenge-tile__progress-bar">
                         <div class="challenge-tile__progress-fill" style="width:0%;"></div>
                     </div>
-                    <span class="challenge-tile__progress-pct">Loading...</span>
+                    <span class="challenge-tile__progress-pct">0 / ${c.total}</span>
                 </div>
             </button>
         `).join('')}
