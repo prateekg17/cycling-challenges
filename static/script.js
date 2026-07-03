@@ -108,6 +108,38 @@ function renderHomeScreen() {
             window.location.hash = tile.dataset.slug;
         });
     });
+
+    // Pre-load progress counts for all tiles in the background
+    CHALLENGES.forEach(c => void prefetchProgress(c));
+}
+
+// ---------------------------------------------------------------------------
+// Home screen progress prefetch
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch activity count for a challenge and update its home tile progress.
+ * Runs in the background when the home screen is shown. Has no side-effects
+ * on activitiesData or the card/table views.
+ * @param {Challenge} challenge
+ */
+async function prefetchProgress(challenge) {
+    try {
+        const res = await fetch('./' + challenge.dataFile);
+        if (!res.ok) return;
+        const activities = await res.json();
+        const tile = elements.homeScreen.querySelector(`[data-slug="${challenge.slug}"]`);
+        if (!tile) return;
+        const count = activities.length;
+        const pct = Math.round(count / challenge.total * 100);
+        tile.querySelector('.challenge-tile__status').textContent =
+            `Active - ${count} of ${challenge.total} complete`;
+        tile.querySelector('.challenge-tile__progress-fill').style.width = pct + '%';
+        tile.querySelector('.challenge-tile__progress-pct').textContent =
+            `${count} / ${challenge.total}`;
+    } catch (_) {
+        // Silent fail - tile stays at 0 if network is unavailable
+    }
 }
 
 // ---------------------------------------------------------------------------

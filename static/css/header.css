@@ -150,9 +150,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    max-width: var(--container-max-width);
-    margin: 0 auto;
-    padding: 0.75rem 2rem 0;
+    flex: 1;
 }
 
 .back-link {
@@ -192,11 +190,6 @@
 }
 
 @media (max-width: 700px) {
-    .challenge-detail-header {
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
-
     .challenge-detail-title {
         font-size: 0.8rem;
     }
