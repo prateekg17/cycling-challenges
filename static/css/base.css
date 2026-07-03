@@ -33,6 +33,10 @@
     box-sizing: border-box;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 body {
     font-family: 'Inter', sans-serif;
     font-weight: 400;
@@ -41,12 +45,19 @@ body {
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 main {
     max-width: var(--container-max-width);
     margin: 0 auto;
     padding: 0 2rem;
+}
+
+/* Expand the active content area to push the footer to the bottom */
+#challenge-detail {
+    flex: 1;
 }
 
 a {

@@ -82,7 +82,6 @@ function showView(view) {
  */
 function renderHomeScreen() {
     elements.homeScreen.innerHTML = `
-        <p class="home-challenges-label">My Challenges</p>
         ${CHALLENGES.map(c => `
             <button
                 class="challenge-tile"
