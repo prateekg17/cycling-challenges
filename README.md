@@ -35,7 +35,7 @@ The site features automated data fetching, parallel API calls, and an interactiv
 
 ## Architecture
 - **Frontend**: Static HTML/CSS/JavaScript served via GitHub Pages
-- **Data Source**: Weekly GitHub Action fetches Strava data and generates `activities.json`
+- **Data Source**: Weekly GitHub Action fetches Strava data and generates `activities-terminus.json`
 - **Deployment**: Automatic GitHub Pages deployment after data updates
 - **Filtering Logic**: TypeScript script that filters activities by date and keywords
 - **Testing**: Vitest for deterministic unit tests (fetch mocked)
@@ -104,9 +104,9 @@ npx vitest
 - **Workflow**: `.github/workflows/test.yaml` runs on pull requests (open, reopen, synchronize, label) and executes the Vitest suite.
 - **Strava credentials not required** for tests (fetch is mocked).
 - **Scheduled fetch & deploy**: `.github/workflows/update-activities.yaml` handles weekly data refresh and Pages deployment.
-- **Page deployment artifact name**: `site-static` (contains the entire `static/` directory including `index.html`, images, and `activities.json`).
+- **Page deployment artifact name**: `site-static` (contains the entire `static/` directory including `index.html`, images, and `activities-terminus.json`).
 - **No duplicate runs**: Concurrency group `update-activities` prevents overlapping scheduled/manual executions.
-- The generated `activities.json` is not committed; it is produced during the workflow and shipped inside the deployment artifact.
+- The generated `activities-terminus.json` is not committed; it is produced during the workflow and shipped inside the deployment artifact.
 
 ## User Interface
 The web UI displays:
@@ -120,9 +120,9 @@ The web UI displays:
 ## How It Works
 1. **Workflow runs** (cron or manual) → refresh Strava token → parallel fetch up to 10 pages.
 2. **Filtering**: Only activities after 22 Mar 2025 containing keyword "terminus" in name or description.
-3. **Output**: Filtered list written to `static/activities.json` in the runner workspace.
+3. **Output**: Filtered list written to `static/activities-terminus.json` in the runner workspace.
 4. **Artifact**: Entire `static` folder uploaded as `site-static`; deployment job publishes it to Pages.
-5. **Frontend**: Static site fetches `activities.json` client-side to render UI.
+5. **Frontend**: Static site fetches `activities-terminus.json` client-side to render UI.
 
 ## Configuration
 - **Schedule**: Edit cron in `.github/workflows/update-activities.yaml`.
@@ -136,7 +136,7 @@ The web UI displays:
 - `.github/workflows/test.yaml` – PR test CI
 - `scripts/fetch-activities.ts` – Strava fetch & processing (ESM / NodeNext)
 - `scripts/fetch-activities.test.ts` – Unit tests (Vitest, mocked fetch)
-- `static/` – Site assets (`index.html`, `css/` (five CSS modules), `script.js`, `activities.json`, images)
+- `static/` – Site assets (`index.html`, `css/` (five CSS modules), `script.js`, `activities-terminus.json`, images)
 - `package.json` – Dependencies & scripts
 - `tsconfig.json` – TypeScript config (ES2022 target, NodeNext resolution)
 

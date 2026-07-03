@@ -6,7 +6,7 @@ This directory contains the static site for the Tube Cycling Challenge.
 - `index.html` - Main page
 - `script.js` - Frontend logic
 - `css/` - CSS modules (base, header, cards, table, footer)
-- `activities.json` - Data file (updated weekly by GitHub Action)
+- `activities-terminus.json` - Data file (updated weekly by GitHub Action)
 - Other assets (images, etc.)
 
 The site is automatically deployed to GitHub Pages when the activities data is updated.
