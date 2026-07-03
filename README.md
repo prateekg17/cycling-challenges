@@ -105,7 +105,7 @@ npx vitest
 - **Scheduled fetch & deploy**: `.github/workflows/update-activities.yaml` handles weekly data refresh and Pages deployment.
 - **Page deployment artifact name**: `site-static` (contains the entire `static/` directory including `index.html`, images, and `activities-terminus.json`).
 - **No duplicate runs**: Concurrency group `update-activities` prevents overlapping scheduled/manual executions.
-- The generated `activities-terminus.json` is not committed; it is produced during the workflow and shipped inside the deployment artifact.
+- The committed `static/activities-terminus.json` is a placeholder; the workflow overwrites it during the run and ships the updated file inside the deployment artifact.
 
 ## User Interface
 The web UI has two screens:

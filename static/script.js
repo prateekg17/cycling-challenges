@@ -131,7 +131,7 @@ async function prefetchProgress(challenge) {
         const tile = elements.homeScreen.querySelector(`[data-slug="${challenge.slug}"]`);
         if (!tile) return;
         const count = activities.length;
-        const pct = Math.round(count / challenge.total * 100);
+        const pct = challenge.total > 0 ? Math.min(100, Math.round(count / challenge.total * 100)) : 0;
         tile.querySelector('.challenge-tile__status').textContent =
             `Active - ${count} of ${challenge.total} complete`;
         tile.querySelector('.challenge-tile__progress-fill').style.width = pct + '%';
@@ -155,6 +155,10 @@ function router() {
     const challenge = CHALLENGES.find(c => c.slug === hash);
 
     if (!challenge) {
+        if (currentFetchController) {
+            currentFetchController.abort();
+            currentFetchController = null;
+        }
         showView('home');
         return;
     }
@@ -225,7 +229,7 @@ async function fetchActivities(challenge) {
         const tile = elements.homeScreen.querySelector(`[data-slug="${challenge.slug}"]`);
         if (tile) {
             const count = activities.length;
-            const pct = Math.round(count / challenge.total * 100);
+            const pct = challenge.total > 0 ? Math.min(100, Math.round(count / challenge.total * 100)) : 0;
             tile.querySelector('.challenge-tile__status').textContent =
                 `Active - ${count} of ${challenge.total} complete`;
             tile.querySelector('.challenge-tile__progress-fill').style.width = pct + '%';

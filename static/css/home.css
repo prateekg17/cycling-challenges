@@ -11,6 +11,9 @@
     max-width: var(--container-max-width);
     margin: 0 auto;
     padding: 2rem 2rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 /* ---- Challenge tile ---- */
