@@ -9,6 +9,28 @@
  * @property {number} [total_elevation_gain] - Elevation gain in meters
  */
 
+/**
+ * @typedef {Object} Challenge
+ * @property {string} slug - URL hash fragment (without #)
+ * @property {string} name - Display name
+ * @property {string} description - Subtitle shown on the home tile
+ * @property {string} dataFile - Filename inside static/ e.g. 'activities-terminus.json'
+ * @property {string[]} gradient - Two CSS colour stops [from, to]
+ * @property {number} total - Target total count for progress bar
+ */
+
+/** @type {Challenge[]} */
+const CHALLENGES = [
+    {
+        slug:        'terminus',
+        name:        'Tube Terminus Challenge',
+        description: 'Cycle to all 33 London Underground terminus stations from home',
+        dataFile:    'activities-terminus.json',
+        gradient:    ['#1b4332', '#40916c'],
+        total:       33,
+    },
+];
+
 // Common table cell styles for reuse
 const tableCellStyle = "padding:8px;border:1px solid #ccc;text-align:center;";
 const tableCellStyleLeft = "padding:8px;border:1px solid #ccc;";
@@ -17,16 +39,120 @@ const tableCellStyleNoWrapLeft = "padding:8px;border:1px solid #ccc;text-align:l
 
 // Cache DOM elements
 const elements = {
-  toggleBtn: document.getElementById('toggle-table-view'),
-  activities: document.getElementById('activities'),
-  tableView: document.getElementById('table-view'),
-  viewToggle: document.querySelector('.view-toggle')
+    homeScreen:       document.getElementById('home-screen'),
+    challengeDetail:  document.getElementById('challenge-detail'),
+    detailNav:        document.getElementById('challenge-detail-nav'),
+    detailTitle:      document.getElementById('challenge-detail-title'),
+    backBtn:          document.getElementById('back-to-challenges'),
+    toggleBtn:        document.getElementById('toggle-table-view'),
+    activities:       document.getElementById('activities'),
+    tableView:        document.getElementById('table-view'),
+    viewToggle:       document.querySelector('.view-toggle'),
 };
 
-/**
- * @type {Activity[]}
- */
+/** @type {Activity[]} */
 let activitiesData = [];
+
+// ---------------------------------------------------------------------------
+// View management
+// ---------------------------------------------------------------------------
+
+/**
+ * Show either the home screen or the challenge detail view.
+ * @param {'home'|'challenge'} view
+ */
+function showView(view) {
+    const showHome = view === 'home';
+    elements.homeScreen.hidden      = !showHome;
+    elements.challengeDetail.hidden = showHome;
+    elements.detailNav.hidden       = showHome;
+}
+
+// ---------------------------------------------------------------------------
+// Home screen
+// ---------------------------------------------------------------------------
+
+/**
+ * Render the challenge tiles into #home-screen.
+ * Called once on first home-screen visit; tiles are static (no counts shown
+ * until data is loaded on first navigation into a challenge).
+ */
+function renderHomeScreen() {
+    elements.homeScreen.innerHTML = `
+        <p class="home-challenges-label">My Challenges</p>
+        ${CHALLENGES.map(c => `
+            <button
+                class="challenge-tile"
+                style="background: linear-gradient(135deg, ${c.gradient[0]}, ${c.gradient[1]});"
+                data-slug="${c.slug}"
+                aria-label="Open ${c.name}"
+            >
+                <p class="challenge-tile__status">Active</p>
+                <h2 class="challenge-tile__name">${c.name}</h2>
+                <p class="challenge-tile__description">${c.description}</p>
+                <div class="challenge-tile__progress">
+                    <div class="challenge-tile__progress-bar">
+                        <div class="challenge-tile__progress-fill" style="width:0%;"></div>
+                    </div>
+                    <span class="challenge-tile__progress-pct">Loading...</span>
+                </div>
+            </button>
+        `).join('')}
+    `;
+
+    // Wire up tile clicks
+    elements.homeScreen.querySelectorAll('.challenge-tile').forEach(tile => {
+        tile.addEventListener('click', () => {
+            window.location.hash = tile.dataset.slug;
+        });
+    });
+}
+
+// ---------------------------------------------------------------------------
+// Router
+// ---------------------------------------------------------------------------
+
+/**
+ * Read the current hash, decide which view to show, and trigger data loading.
+ * Falls back to home screen for unknown hashes.
+ */
+function router() {
+    const hash = window.location.hash.replace('#', '');
+    const challenge = CHALLENGES.find(c => c.slug === hash);
+
+    if (!challenge) {
+        showView('home');
+        return;
+    }
+
+    // Show challenge detail
+    showView('challenge');
+    elements.detailTitle.textContent = challenge.name;
+
+    // Reset data state and reload for this challenge
+    activitiesData = [];
+    tableSort = { column: null, asc: true };
+    tableVisible = false;
+    elements.activities.innerHTML = '';
+    elements.tableView.innerHTML = '';
+    elements.activities.style.display = 'none';
+    elements.tableView.style.display = 'none';
+    elements.viewToggle.style.display = 'none';
+
+    void fetchActivities(challenge.dataFile);
+}
+
+// Back link
+elements.backBtn.addEventListener('click', () => {
+    window.location.hash = '';
+});
+
+// Hash change (browser back/forward + tile clicks)
+window.addEventListener('hashchange', router);
+
+// ---------------------------------------------------------------------------
+// Activities data loading
+// ---------------------------------------------------------------------------
 
 // Helper function to show the activities view
 function showActivitiesView() {
@@ -34,15 +160,17 @@ function showActivitiesView() {
     elements.toggleBtn.style.display = '';
 }
 
-async function fetchActivities() {
-    // Removed loader handling (static site)
+/**
+ * Fetch and render activities for one challenge.
+ * @param {string} dataFile - Filename inside static/ e.g. 'activities-terminus.json'
+ */
+async function fetchActivities(dataFile) {
     elements.activities.style.display = 'none';
     elements.tableView.style.display = 'none';
     elements.activities.innerHTML = '';
 
-
     try {
-        const res = await fetch('./activities.json');
+        const res = await fetch('./' + dataFile);
         if (!res.ok) throw new Error(`Failed to load activities: ${res.status}`);
 
         showActivitiesView();
@@ -80,7 +208,12 @@ async function fetchActivities() {
         elements.viewToggle.style.display = 'none';
     }
 }
+
 let tableSort = { column: null, asc: true };
+
+// ---------------------------------------------------------------------------
+// Table view
+// ---------------------------------------------------------------------------
 
 // Helper to format activity meta fields
 /**
@@ -88,11 +221,11 @@ let tableSort = { column: null, asc: true };
  */
 function formatActivityMeta(a) {
     return {
-        distance: a.distance ? (a.distance / 1000).toFixed(2) + ' km' : 'N/A',
-        time: a.moving_time ? formatDuration(a.moving_time) : 'N/A',
-        speed: a.distance && a.moving_time ? calcSpeed(a.distance, a.moving_time) + ' km/h' : 'N/A',
+        distance:  a.distance ? (a.distance / 1000).toFixed(2) + ' km' : 'N/A',
+        time:      a.moving_time ? formatDuration(a.moving_time) : 'N/A',
+        speed:     a.distance && a.moving_time ? calcSpeed(a.distance, a.moving_time) + ' km/h' : 'N/A',
         elevation: a.total_elevation_gain ? a.total_elevation_gain.toFixed(0) + ' m' : 'N/A',
-        date: a.start_date ? formatDate(a.start_date) : 'N/A'
+        date:      a.start_date ? formatDate(a.start_date) : 'N/A'
     };
 }
 
@@ -133,36 +266,31 @@ function renderTableView() {
     // Calculate totals - perform only one loop over the data
     const totals = sorted.reduce((sum, a) => {
         return {
-            distance: sum.distance + (a.distance || 0),
+            distance:    sum.distance    + (a.distance || 0),
             moving_time: sum.moving_time + (a.moving_time || 0),
-            elevation: sum.elevation + (a.total_elevation_gain || 0)
+            elevation:   sum.elevation   + (a.total_elevation_gain || 0)
         };
     }, { distance: 0, moving_time: 0, elevation: 0 });
 
-    const totalDistanceDisplay = totals.distance ? (totals.distance / 1000).toFixed(2) + ' km' : 'N/A';
-    const avgSpeedDisplay = (totals.distance && totals.moving_time) ?
-        ((totals.distance / 1000) / (totals.moving_time / 3600)).toFixed(2) + ' km/h' : 'N/A';
-    const totalElevationDisplay = totals.elevation ? totals.elevation.toFixed(0) + ' m' : 'N/A';
-    const totalTimeDisplay = totals.moving_time ? formatDuration(totals.moving_time) : 'N/A';
+    const totalDistanceDisplay  = totals.distance    ? (totals.distance / 1000).toFixed(2) + ' km' : 'N/A';
+    const avgSpeedDisplay       = (totals.distance && totals.moving_time)
+        ? ((totals.distance / 1000) / (totals.moving_time / 3600)).toFixed(2) + ' km/h' : 'N/A';
+    const totalElevationDisplay = totals.elevation   ? totals.elevation.toFixed(0) + ' m' : 'N/A';
+    const totalTimeDisplay      = totals.moving_time ? formatDuration(totals.moving_time) : 'N/A';
 
-    // Set table styles once - UPDATED WITH STRONGER FIX FOR THE GAP
-    elements.tableView.style.position = 'relative';
-    elements.tableView.style.overflowX = 'auto';
-    elements.tableView.style.overflowY = 'visible';
-    elements.tableView.style.maxHeight = 'none';
+    // Set table styles once
+    elements.tableView.style.position   = 'relative';
+    elements.tableView.style.overflowX  = 'auto';
+    elements.tableView.style.overflowY  = 'visible';
+    elements.tableView.style.maxHeight  = 'none';
     elements.tableView.style.paddingBottom = '0';
-    // Remove the bottom margin since road is now relative
     elements.tableView.style.marginLeft = 'auto';
     elements.tableView.style.marginRight = 'auto';
 
     // Build table header with sort indicators
     const getSortIcon = column => {
-        if (tableSort.column !== column) {
-            return '';
-        }
-
-        let icon = tableSort.asc ? '▲' : '▼';
-        return `<span style='font-size:0.9em;'>${icon}</span>`;
+        if (tableSort.column !== column) return '';
+        return `<span style='font-size:0.9em;'>${tableSort.asc ? '▲' : '▼'}</span>`;
     };
 
     const getSortableColumnProps = column => {
@@ -214,7 +342,7 @@ function renderTableView() {
         </tr>
     `;
 
-    // Combine all parts into final HTML - UPDATED TO CENTER THE TABLE CONTENT
+    // Combine all parts into final HTML
     elements.tableView.innerHTML = `
         <div style="margin:0 auto;width:100%;">
             <div>
@@ -240,12 +368,16 @@ function renderTableView() {
         renderTableView();
     };
 
-    document.getElementById('sort-distance').onclick = () => handleSortClick('distance');
-    document.getElementById('sort-time').onclick = () => handleSortClick('time');
-    document.getElementById('sort-speed').onclick = () => handleSortClick('speed');
+    document.getElementById('sort-distance').onclick  = () => handleSortClick('distance');
+    document.getElementById('sort-time').onclick      = () => handleSortClick('time');
+    document.getElementById('sort-speed').onclick     = () => handleSortClick('speed');
     document.getElementById('sort-elevation').onclick = () => handleSortClick('elevation');
-    document.getElementById('sort-date').onclick = () => handleSortClick('date');
+    document.getElementById('sort-date').onclick      = () => handleSortClick('date');
 }
+
+// ---------------------------------------------------------------------------
+// Card view
+// ---------------------------------------------------------------------------
 
 // Render the card view for activities
 /**
@@ -275,48 +407,39 @@ function renderCardView(activities) {
     }).join('');
 }
 
+// ---------------------------------------------------------------------------
+// View toggle (card <-> table)
+// ---------------------------------------------------------------------------
 
-// Centralize toggle button labels
+// Centralise toggle button labels
 const TOGGLE_VIEW_LABELS = {
-    card: 'See Card View',
+    card:  'See Card View',
     table: 'See Tabular View'
 };
 
 // Memoization cache for expensive calculations
 const memoCache = {
-    formatDate: new Map(),
+    formatDate:     new Map(),
     formatDuration: new Map(),
-    calcSpeed: new Map()
+    calcSpeed:      new Map()
 };
 
 // Memoized formatting functions
 function formatDuration(seconds) {
     if (seconds === undefined || seconds === null) return 'N/A';
-
-    // Check cache first
     const cacheKey = seconds.toString();
-    if (memoCache.formatDuration.has(cacheKey)) {
-        return memoCache.formatDuration.get(cacheKey);
-    }
-
+    if (memoCache.formatDuration.has(cacheKey)) return memoCache.formatDuration.get(cacheKey);
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
     const result = `${h > 0 ? h + 'h ' : ''}${m}m ${s}s`;
-
-    // Store in cache
     memoCache.formatDuration.set(cacheKey, result);
     return result;
 }
 
 function formatDate(dateStr) {
     if (!dateStr) return '';
-
-    // Check cache first
-    if (memoCache.formatDate.has(dateStr)) {
-        return memoCache.formatDate.get(dateStr);
-    }
-
+    if (memoCache.formatDate.has(dateStr)) return memoCache.formatDate.get(dateStr);
     const date = new Date(dateStr);
     const day = date.getDate();
     const month = date.toLocaleString('default', { month: 'long' });
@@ -330,10 +453,7 @@ function formatDate(dateStr) {
             default: return 'th';
         }
     };
-
     const result = `${day}${daySuffix(day)} ${month} ${year}`;
-
-    // Store in cache
     memoCache.formatDate.set(dateStr, result);
     return result;
 }
@@ -341,17 +461,10 @@ function formatDate(dateStr) {
 function calcSpeed(distance, moving_time) {
     // distance in meters, moving_time in seconds
     if (!distance || !moving_time) return 'N/A';
-
-    // Check cache first
     const cacheKey = `${distance}-${moving_time}`;
-    if (memoCache.calcSpeed.has(cacheKey)) {
-        return memoCache.calcSpeed.get(cacheKey);
-    }
-
+    if (memoCache.calcSpeed.has(cacheKey)) return memoCache.calcSpeed.get(cacheKey);
     const speed = (distance / 1000) / (moving_time / 3600); // km/h
     const result = speed.toFixed(2);
-
-    // Store in cache
     memoCache.calcSpeed.set(cacheKey, result);
     return result;
 }
@@ -385,5 +498,9 @@ elements.toggleBtn.addEventListener('click', toggleView);
 const initialViewMode = localStorage.getItem('viewMode');
 elements.toggleBtn.textContent = initialViewMode === 'table' ? TOGGLE_VIEW_LABELS.card : TOGGLE_VIEW_LABELS.table;
 
-// Initial fetch and render
-void fetchActivities();
+// ---------------------------------------------------------------------------
+// Boot
+// ---------------------------------------------------------------------------
+
+renderHomeScreen();
+router();
