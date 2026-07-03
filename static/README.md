@@ -1,6 +1,6 @@
-# Tube Cycling Challenge - GitHub Pages
+# Prateek's Cycling Challenges - GitHub Pages
 
-This directory contains the static site for the Tube Cycling Challenge.
+This directory contains the static site for Prateek's Cycling Challenges.
 
 ## Files
 - `index.html` - Main page

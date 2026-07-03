@@ -2,9 +2,8 @@
 
 A GitHub Pages static site that tracks personal cycling challenges. The site automatically updates weekly with new Strava activities via a scheduled GitHub Action.
 
-Currently active: cycling to and from all 33 terminus Tube stations on the London Underground network from home.
+The site supports multiple cycling challenges. Currently active: the Tube Terminus Challenge - cycling to and from all 33 terminus stations on the London Underground network from home.
 
-As part of this Tube challenge, I'm cycling to and from all the terminus Tube stations from my home within the London TfL underground network.
 There are a total of 33 such Tube stations spread across the following lines:
 - District Line
 - Piccadilly Line
@@ -21,7 +20,7 @@ There are a total of 33 such Tube stations spread across the following lines:
 The site features automated data fetching, parallel API calls, and an interactive web UI with no authentication required.
 
 ## Features
-- **Automated weekly updates** via GitHub Actions (every Sunday at 23:00 GMT)
+- **Automated weekly updates** via GitHub Actions (every Saturday and Sunday at 20:00 GMT)
 - **Static site** hosted on GitHub Pages - no server required
 - Fetches activities from Strava API with pre-configured authentication
 - Filters activities by the challenge start date and the "terminus" keyword
@@ -109,9 +108,10 @@ npx vitest
 - The generated `activities-terminus.json` is not committed; it is produced during the workflow and shipped inside the deployment artifact.
 
 ## User Interface
-The web UI displays:
-- **Header**: Site title, challenge tab strip (one tab per challenge), and a Strava follow badge.
-- **Toggle View Button**: Switch between card and tabular views.
+The web UI has two screens:
+- **Challenges home screen**: Themed tiles, one per challenge, showing name, description, and live progress. Clicking a tile navigates to that challenge's detail view.
+- **Challenge detail view**: Back link ("<- All Challenges") to return home, challenge name in the header, and the full activity list below.
+- **Toggle View Button**: Switch between card and tabular views within a challenge.
 - **Card View**: Each activity shows ride name, date, stats, description (if present).
 - **Tabular View**: Sortable columns (name, date, distance, time, speed, elevation) with totals/averages.
 - **Empty State Message**: Clear message when no activities match the filter.
