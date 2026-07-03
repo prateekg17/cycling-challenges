@@ -147,7 +147,7 @@ function router() {
     elements.tableView.style.display = 'none';
     elements.viewToggle.style.display = ''; // clear any leftover inline style; parent hidden attr controls visibility
 
-    void fetchActivities(challenge.dataFile);
+    void fetchActivities(challenge);
 }
 
 // Back link
@@ -170,9 +170,10 @@ function showActivitiesView() {
 
 /**
  * Fetch and render activities for one challenge.
- * @param {string} dataFile - Filename inside static/ e.g. 'activities-terminus.json'
+ * @param {Challenge} challenge - The challenge to load
  */
-async function fetchActivities(dataFile) {
+async function fetchActivities(challenge) {
+    const dataFile = challenge.dataFile;
     const controller = new AbortController();
     currentFetchController = controller;
     elements.activities.style.display = 'none';
@@ -187,6 +188,18 @@ async function fetchActivities(dataFile) {
         const activities = await res.json();
         activities.forEach(a => a._timestamp = a.start_date ? Date.parse(a.start_date) : 0);
         activitiesData = activities;
+
+        // Update the home tile progress now that we have the real count
+        const tile = elements.homeScreen.querySelector(`[data-slug="${challenge.slug}"]`);
+        if (tile) {
+            const count = activities.length;
+            const pct = Math.round(count / challenge.total * 100);
+            tile.querySelector('.challenge-tile__status').textContent =
+                `Active - ${count} of ${challenge.total} complete`;
+            tile.querySelector('.challenge-tile__progress-fill').style.width = pct + '%';
+            tile.querySelector('.challenge-tile__progress-pct').textContent =
+                `${count} / ${challenge.total}`;
+        }
 
         if (activities.length === 0) {
             elements.activities.innerHTML = '<p>No activities found for this challenge.</p>';
