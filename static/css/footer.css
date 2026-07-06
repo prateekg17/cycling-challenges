@@ -36,7 +36,8 @@
     transition: color 0.15s;
 }
 
-.github-link:hover {
+.github-link:hover,
+.github-link:focus-visible {
     color: var(--text-primary);
 }
 
