@@ -1,0 +1,10 @@
+slug: terminus
+name: Tube Terminus Challenge
+description: Cycle to all 33 London Underground terminus stations from home
+total: 33
+gradient:
+  - '#1b4332'
+  - '#40916c'
+filterKeyword: terminus
+startDate: '2025-03-22T00:00:00Z'
+dataFile: activities-terminus.json
