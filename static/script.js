@@ -20,16 +20,7 @@
  */
 
 /** @type {Challenge[]} */
-const CHALLENGES = [
-    {
-        slug:        'terminus',
-        name:        'Tube Terminus Challenge',
-        description: 'Cycle to all 33 London Underground terminus stations from home',
-        dataFile:    'activities-terminus.json',
-        gradient:    ['#1b4332', '#40916c'],
-        total:       33,
-    },
-];
+let CHALLENGES = [];
 
 // Common table cell styles for reuse
 const tableCellStyle = "padding:8px;border:1px solid #ccc;text-align:center;";
@@ -562,5 +553,25 @@ elements.toggleBtn.textContent = initialViewMode === 'table' ? TOGGLE_VIEW_LABEL
 // Boot
 // ---------------------------------------------------------------------------
 
-renderHomeScreen();
-router();
+async function init() {
+    try {
+        const res = await fetch('./challenges.json');
+        if (!res.ok) throw new Error(`Failed to load challenges: ${res.status}`);
+        const json = await res.json();
+        CHALLENGES = Array.isArray(json) ? json : [];
+    } catch (err) {
+        console.error('Could not load challenges.json:', err);
+        CHALLENGES = [];
+    }
+
+    if (CHALLENGES.length === 0) {
+        elements.homeScreen.textContent = 'No challenges available.';
+        showView('home');
+        return;
+    }
+
+    renderHomeScreen();
+    router();
+}
+
+init();
