@@ -9,15 +9,23 @@
     "fetch-activities": "tsc && node dist/fetch-activities.js",
     "test": "vitest run"
   },
-  "keywords": ["strava", "cycling", "github-pages", "tube", "london"],
+  "keywords": [
+    "strava",
+    "cycling",
+    "github-pages",
+    "tube",
+    "london"
+  ],
   "author": "Prateek",
   "license": "MIT",
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^26.1.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10"
   },
   "dependencies": {
+    "js-yaml": "^5.2.1",
     "node-fetch": "^3.3.2"
   }
 }
