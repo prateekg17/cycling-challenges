@@ -41,7 +41,7 @@ The site features automated data fetching, parallel API calls, and an interactiv
 - **Testing**: Vitest for deterministic unit tests (fetch mocked)
 
 ## Requirements
-- Node.js 20+ (local + GitHub Actions) – project uses native ESM (`"type": "module"`) and `NodeNext` module resolution
+- Node.js 24 (local + GitHub Actions) – project uses native ESM (`"type": "module"`) and `NodeNext` module resolution
 - GitHub repository with Pages enabled
 - Strava API credentials:
     - `STRAVA_CLIENT_ID` (GitHub Actions Variable)
@@ -60,13 +60,13 @@ The site features automated data fetching, parallel API calls, and an interactiv
    - [How to obtain credentials](https://developers.strava.com/docs/getting-started/#account)
 4. **Trigger the workflow**:
    - Manual: Actions → "Update Strava Activities" → Run workflow
-   - Automatic: Every Sunday at 23:00 GMT
+   - Automatic: Every Saturday and Sunday at 20:00 GMT
 
 ### For Local Development
 1. Clone repository:
    ```sh
    git clone <repo-url>
-   cd tube-cycling-challenge
+   cd cycling-challenges
    ```
 2. Install dependencies:
    ```sh
