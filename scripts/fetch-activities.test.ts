@@ -39,14 +39,14 @@ describe('filterAndSortActivities', () => {
             act({id: 4, name: 'Another terminus cruise', start_date: '2025-04-01T12:00:00Z'}),
             act({id: 5, name: 'Random', description: 'nothing special', start_date: '2025-03-31T12:00:00Z'})
         ];
-        const result = filterAndSortActivities(activities);
+        const result = filterAndSortActivities(activities, 'terminus');
         expect(result.map(a => a.id)).toEqual([3, 2, 4]);
     });
 
     it('returns empty array when no matches', async () => {
         const {filterAndSortActivities} = await import('./fetch-activities.js');
         const activities: StravaActivity[] = [act({id: 1, name: 'Ride A'}), act({id: 2, name: 'Ride B'})];
-        expect(filterAndSortActivities(activities)).toEqual([]);
+        expect(filterAndSortActivities(activities, 'terminus')).toEqual([]);
     });
 });
 
@@ -98,7 +98,7 @@ describe('fetchActivitiesPage', () => {
             json: async () => mockActivities
         });
         const {fetchActivitiesPage} = await import('./fetch-activities.js');
-        const list = await fetchActivitiesPage('token', 1);
+        const list = await fetchActivitiesPage('token', 1, '2025-03-22T00:00:00Z');
         expect(list).toEqual(mockActivities);
         const calledUrl: string = mockFetch.mock.calls[0][0];
         expect(calledUrl).toMatch(/page=1/);
