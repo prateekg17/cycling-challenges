@@ -557,11 +557,19 @@ async function init() {
     try {
         const res = await fetch('./challenges.json');
         if (!res.ok) throw new Error(`Failed to load challenges: ${res.status}`);
-        CHALLENGES = await res.json();
+        const json = await res.json();
+        CHALLENGES = Array.isArray(json) ? json : [];
     } catch (err) {
         console.error('Could not load challenges.json:', err);
         CHALLENGES = [];
     }
+
+    if (CHALLENGES.length === 0) {
+        elements.homeScreen.textContent = 'No challenges available.';
+        showView('home');
+        return;
+    }
+
     renderHomeScreen();
     router();
 }
