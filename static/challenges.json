@@ -2,7 +2,7 @@
   {
     "slug": "terminus",
     "name": "London's Underground Tube Terminus Challenge",
-    "description": "Cycle to all 33 London Underground terminus stations from home and back in a single ride.",
+    "description": "Cycle to all 33 London Underground terminus stations from home and back in a single ride per station.",
     "dataFile": "activities-terminus.json",
     "gradient": ["#1b4332", "#40916c"],
     "total": 33,
