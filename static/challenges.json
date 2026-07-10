@@ -5,6 +5,8 @@
     "description": "Cycle to all 33 London Underground terminus stations from home",
     "dataFile": "activities-terminus.json",
     "gradient": ["#1b4332", "#40916c"],
-    "total": 33
+    "total": 33,
+    "filterKeyword": "terminus",
+    "startDate": "2025-03-22T00:00:00Z"
   }
 ]

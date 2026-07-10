@@ -4,21 +4,32 @@
  * This script fetches cycling activities from the Strava API and generates
  * a static JSON file for the GitHub Pages site.
  *
- * Reads challenge configs from challenges/<slug>/config.yaml.
+ * Reads challenge configs from static/challenges.json.
  * For each challenge, filters activities by filterKeyword and startDate.
  *
  * Run by GitHub Actions weekly on Sundays at 23:00 GMT.
  */
 
-import {writeFileSync} from 'fs';
+import {readFileSync, writeFileSync} from 'fs';
 import {dirname, join} from 'path';
 import {fileURLToPath} from 'url';
 import fetch from 'node-fetch';
-import {loadChallenges} from './load-challenges.js';
 
 // ES module replacement for __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// Exported for tests
+export interface ChallengeConfig {
+    slug: string;
+    name: string;
+    description: string;
+    dataFile: string;
+    gradient: [string, string];
+    total: number;
+    filterKeyword: string;
+    startDate: string;
+}
 
 // Exported for tests
 export interface StravaActivity {
@@ -147,8 +158,8 @@ export function filterAndSortActivities(activities: StravaActivity[], filterKeyw
  */
 async function main() {
     const accessToken = await getAccessToken();
-    const challengesDir = join(__dirname, '..', 'challenges');
-    const challenges = loadChallenges(challengesDir);
+    const challengesPath = join(__dirname, '..', 'static', 'challenges.json');
+    const challenges: ChallengeConfig[] = JSON.parse(readFileSync(challengesPath, 'utf8'));
 
     try {
         for (const challenge of challenges) {
@@ -163,19 +174,6 @@ async function main() {
             writeFileSync(outputPath, JSON.stringify(filteredActivities, null, 2));
             console.log(`Activities saved to ${outputPath}`);
         }
-
-        // Write challenges.json for the frontend
-        const frontendChallenges = challenges.map(c => ({
-            slug:        c.slug,
-            name:        c.name,
-            description: c.description,
-            dataFile:    c.dataFile,
-            gradient:    c.gradient,
-            total:       c.total,
-        }));
-        const challengesJsonPath = join(__dirname, '..', 'static', 'challenges.json');
-        writeFileSync(challengesJsonPath, JSON.stringify(frontendChallenges, null, 2));
-        console.log(`\nWrote ${challenges.length} challenge(s) to ${challengesJsonPath}`);
 
     } catch (error) {
         console.error('Error:', error);
