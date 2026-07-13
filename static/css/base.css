@@ -37,6 +37,10 @@
     display: none !important;
 }
 
+html {
+    overflow-x: hidden;
+}
+
 body {
     font-family: 'Inter', sans-serif;
     font-weight: 400;
@@ -47,12 +51,15 @@ body {
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 main {
     max-width: var(--container-max-width);
+    width: 100%;
     margin: 0 auto;
     padding: 0 2rem;
+    box-sizing: border-box;
 }
 
 /* Expand the active content area to push the footer to the bottom */

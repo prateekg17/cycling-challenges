@@ -7,9 +7,7 @@
 
 #table-view {
     margin: 1.5rem 0 2rem;
-    max-width: var(--container-max-width);
-    margin-left: auto;
-    margin-right: auto;
+    max-width: 100%;
     overflow-x: auto;
 }
 

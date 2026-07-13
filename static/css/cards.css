@@ -22,8 +22,7 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.25rem;
-    max-width: var(--container-max-width);
-    margin: 2rem auto 0;
+    margin: 2rem 0 0;
     align-items: stretch;
 }
 
