@@ -29,7 +29,6 @@
     color: var(--text-primary);
     letter-spacing: -0.02em;
     margin: 0;
-    min-width: 0;
 }
 
 /* ---- Strava badge ---- */
@@ -133,21 +132,38 @@
 }
 
 @media (max-width: 700px) {
-    .site-header-content,
+    .site-header-content {
+        padding-left: 1rem;
+        padding-right: 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
     .challenge-tabs-inner {
         padding-left: 1rem;
         padding-right: 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
     }
 
     .site-title {
         font-size: 1rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        flex: 1 1 100%;
+    }
+
+    .follow-strava {
+        align-self: flex-start;
     }
 
     .follow-strava img {
         height: 26px;
+    }
+
+    #toggle-table-view {
+        align-self: flex-start;
     }
 }
 
@@ -199,5 +215,13 @@
 @media (max-width: 700px) {
     .challenge-detail-title {
         font-size: 0.8rem;
+    }
+
+    .challenge-detail-header {
+        flex: 1 1 100%;
+    }
+
+    #toggle-table-view {
+        margin-left: auto;
     }
 }
