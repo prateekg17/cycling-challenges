@@ -207,9 +207,7 @@
     font-weight: 600;
     color: var(--text-secondary);
     margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-wrap: break-word;
 }
 
 @media (max-width: 700px) {
