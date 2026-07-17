@@ -29,7 +29,7 @@
     table-layout: auto;
 }
 
-/* Header row - override inline background set by script.js */
+/* Header row */
 #table-view table thead tr {
     background: color-mix(in srgb, var(--gradient-from) 35%, var(--bg-primary)) !important;
 }
@@ -86,7 +86,7 @@
     text-decoration: underline;
 }
 
-/* Totals row - last row in tbody, override inline background */
+/* Totals row - last row in tbody */
 #table-view table tbody tr:last-child td {
     background: color-mix(in srgb, var(--gradient-from) 35%, var(--bg-primary)) !important;
     font-family: 'Space Grotesk', sans-serif;
