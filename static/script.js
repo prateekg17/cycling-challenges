@@ -375,7 +375,7 @@ function renderTableView() {
         const { distance, time, speed, elevation, date } = formatActivityMeta(a);
         return `<tr>
             <td style="${tableCellStyle}">${i + 1}</td>
-            <td class="ride-name-col" style="${tableCellStyleNoWrapLeft}"><a href="https://www.strava.com/activities/${a.id}" target="_blank" rel="noopener" style="color:#0019a8;text-decoration:underline;">${a.name}</a></td>
+            <td class="ride-name-col" style="${tableCellStyleNoWrapLeft}"><a href="https://www.strava.com/activities/${a.id}" target="_blank" rel="noopener">${a.name}</a></td>
             <td class="date-col" style="${tableCellStyleNoWrap}">${date}</td>
             <td class="distance-col" style="${tableCellStyleNoWrap}">${distance}</td>
             <td class="time-col" style="${tableCellStyleNoWrap}">${time}</td>
