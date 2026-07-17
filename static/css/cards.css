@@ -29,7 +29,7 @@
 /* ---- Card component ---- */
 
 .activity {
-    background: var(--bg-surface);
+    background: color-mix(in srgb, var(--gradient-from) 25%, var(--bg-surface));
     border: 1px solid var(--border);
     border-left: 3px solid transparent;
     border-radius: var(--card-radius);
@@ -45,7 +45,7 @@
 }
 
 .activity:hover {
-    background: var(--bg-surface-hover);
+    background: color-mix(in srgb, var(--gradient-to) 35%, var(--bg-surface));
     border-left-color: var(--accent-orange);
 }
 

@@ -18,20 +18,20 @@
 /* Wrapper divs injected by script.js */
 #table-view > div,
 #table-view > div > div {
-    background: var(--bg-primary) !important;
+    background: color-mix(in srgb, var(--gradient-from) 18%, var(--bg-primary)) !important;
 }
 
 #table-view table {
     width: 100%;
     border-collapse: collapse;
-    background: var(--bg-primary) !important;
+    background: color-mix(in srgb, var(--gradient-from) 18%, var(--bg-primary)) !important;
     margin: 0 auto;
     table-layout: auto;
 }
 
-/* Header row - override inline background set by script.js */
+/* Header row */
 #table-view table thead tr {
-    background: var(--bg-surface) !important;
+    background: color-mix(in srgb, var(--gradient-from) 35%, var(--bg-primary)) !important;
 }
 
 #table-view table th {
@@ -39,7 +39,7 @@
     font-weight: 700;
     font-size: 0.85rem;
     color: var(--text-primary) !important;
-    background: var(--bg-surface) !important;
+    background: color-mix(in srgb, var(--gradient-from) 35%, var(--bg-primary)) !important;
     padding: 0.75rem 0.75rem !important;
     border: 1px solid var(--border) !important;
     text-align: left;
@@ -53,7 +53,7 @@
 }
 
 #table-view table th[role="button"]:hover {
-    background: var(--bg-surface-hover) !important;
+    background: color-mix(in srgb, var(--gradient-to) 40%, var(--bg-primary)) !important;
 }
 
 /* Body rows */
@@ -73,22 +73,22 @@
 
 /* Alternating row tint */
 #table-view table tbody tr:nth-child(even) td {
-    background: rgba(255, 255, 255, 0.02) !important;
+    background: color-mix(in srgb, var(--gradient-from) 8%, transparent) !important;
 }
 
 /* Ride name links */
 #table-view table td.ride-name-col a {
-    color: var(--accent-cyan) !important;
-    text-decoration: none;
+    color: var(--gradient-to) !important;
+    text-decoration: underline;
 }
 
 #table-view table td.ride-name-col a:hover {
     text-decoration: underline;
 }
 
-/* Totals row - last row in tbody, override inline background */
+/* Totals row - last row in tbody */
 #table-view table tbody tr:last-child td {
-    background: var(--bg-surface) !important;
+    background: color-mix(in srgb, var(--gradient-from) 35%, var(--bg-primary)) !important;
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
     border-left: none !important;

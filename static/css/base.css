@@ -10,6 +10,10 @@
     --bg-surface: #1a1a2e;
     --bg-surface-hover: #22223a;
 
+    /* Gradient tint - overridden per-challenge by script.js */
+    --gradient-from: #1a1a2e;
+    --gradient-to:   #22223a;
+
     /* Accent colours */
     --accent-orange: #fc4c02;
     --accent-red: #e32017;

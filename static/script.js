@@ -158,6 +158,10 @@ function router() {
     showView('challenge');
     elements.detailTitle.textContent = challenge.name;
 
+    // Expose gradient colours as CSS variables for tinting cards and table
+    document.documentElement.style.setProperty('--gradient-from', challenge.gradient[0]);
+    document.documentElement.style.setProperty('--gradient-to',   challenge.gradient[1]);
+
     // Cancel any in-flight fetch from a previous navigation
     if (currentFetchController) {
         currentFetchController.abort();
@@ -354,7 +358,7 @@ function renderTableView() {
 
     const tableHeader = `
         <thead>
-            <tr style="background:#e6f6fb;">
+            <tr>
                 <th style="${tableCellStyle}">#</th>
                 <th class="ride-name-col" style="${tableCellStyleLeft}">Ride Name</th>
                 <th class="date-col" id="sort-date" ${getSortableColumnProps('date')} style="${tableCellStyleLeft};cursor:pointer;user-select:none;white-space:nowrap;">📅 Date ${getSortIcon('date')}</th>
@@ -371,7 +375,7 @@ function renderTableView() {
         const { distance, time, speed, elevation, date } = formatActivityMeta(a);
         return `<tr>
             <td style="${tableCellStyle}">${i + 1}</td>
-            <td class="ride-name-col" style="${tableCellStyleNoWrapLeft}"><a href="https://www.strava.com/activities/${a.id}" target="_blank" rel="noopener" style="color:#0019a8;text-decoration:underline;">${a.name}</a></td>
+            <td class="ride-name-col" style="${tableCellStyleNoWrapLeft}"><a href="https://www.strava.com/activities/${a.id}" target="_blank" rel="noopener">${a.name}</a></td>
             <td class="date-col" style="${tableCellStyleNoWrap}">${date}</td>
             <td class="distance-col" style="${tableCellStyleNoWrap}">${distance}</td>
             <td class="time-col" style="${tableCellStyleNoWrap}">${time}</td>
@@ -382,7 +386,7 @@ function renderTableView() {
 
     // Build table footer with totals
     const tableFooter = `
-        <tr style="background:#f5f5f5;">
+        <tr>
             <td style="${tableCellStyle};font-weight:bold;"></td>
             <td class="ride-name-col" style="${tableCellStyle};font-weight:bold;">Total</td>
             <td class="date-col" style="${tableCellStyle};font-weight:bold;"></td>
@@ -397,7 +401,7 @@ function renderTableView() {
     elements.tableView.innerHTML = `
         <div style="margin:0 auto;width:100%;">
             <div>
-                <table style="width:100%;border-collapse:collapse;background:#fff;margin:0 auto;">
+                <table style="width:100%;border-collapse:collapse;margin:0 auto;">
                     ${tableHeader}
                     <tbody>
                         ${tableRows}
