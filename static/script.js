@@ -85,7 +85,7 @@ function renderHomeScreen() {
                 <p class="challenge-tile__description">${c.description}</p>
                 <div class="challenge-tile__progress">
                     <div class="challenge-tile__progress-bar">
-                        <div class="challenge-tile__progress-fill" style="width:0%;"></div>
+                        <div class="challenge-tile__progress-fill" style="width:0;"></div>
                     </div>
                     <span class="challenge-tile__progress-pct">0 / ${c.total}</span>
                 </div>
@@ -128,8 +128,9 @@ async function prefetchProgress(challenge) {
         tile.querySelector('.challenge-tile__progress-fill').style.width = pct + '%';
         tile.querySelector('.challenge-tile__progress-pct').textContent =
             `${count} / ${challenge.total}`;
-    } catch (_) {
+    } catch (err) {
         // Silent fail - tile stays at 0 if network is unavailable
+        console.debug('prefetchProgress failed for', challenge.slug, err);
     }
 }
 
@@ -557,25 +558,20 @@ elements.toggleBtn.textContent = initialViewMode === 'table' ? TOGGLE_VIEW_LABEL
 // Boot
 // ---------------------------------------------------------------------------
 
-async function init() {
-    try {
-        const res = await fetch('./challenges.json');
-        if (!res.ok) throw new Error(`Failed to load challenges: ${res.status}`);
-        const json = await res.json();
-        CHALLENGES = Array.isArray(json) ? json : [];
-    } catch (err) {
-        console.error('Could not load challenges.json:', err);
-        CHALLENGES = [];
-    }
+try {
+    const res = await fetch('./challenges.json');
+    if (!res.ok) throw new Error(`Failed to load challenges: ${res.status}`);
+    const json = await res.json();
+    CHALLENGES = Array.isArray(json) ? json : [];
+} catch (err) {
+    console.error('Could not load challenges.json:', err);
+    CHALLENGES = [];
+}
 
-    if (CHALLENGES.length === 0) {
-        elements.homeScreen.textContent = 'No challenges available.';
-        showView('home');
-        return;
-    }
-
+if (CHALLENGES.length === 0) {
+    elements.homeScreen.textContent = 'No challenges available.';
+    showView('home');
+} else {
     renderHomeScreen();
     router();
 }
-
-init();

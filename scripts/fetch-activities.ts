@@ -10,9 +10,9 @@
  * Run by GitHub Actions weekly on Sundays at 23:00 GMT.
  */
 
-import {readFileSync, writeFileSync} from 'fs';
-import {dirname, join} from 'path';
-import {fileURLToPath} from 'url';
+import {readFileSync, writeFileSync} from 'node:fs';
+import {dirname, join} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import fetch from 'node-fetch';
 
 // ES module replacement for __dirname
@@ -153,15 +153,13 @@ export function filterAndSortActivities(activities: StravaActivity[], filterKeyw
     return filtered;
 }
 
-/**
- * Main function to fetch and save activities
- */
-async function main() {
-    const accessToken = await getAccessToken();
-    const challengesPath = join(__dirname, '..', 'static', 'challenges.json');
-    const challenges: ChallengeConfig[] = JSON.parse(readFileSync(challengesPath, 'utf8'));
-
+// Only run when executed directly (not when imported for tests)
+if (import.meta.url === `file://${process.argv[1]}`) {
     try {
+        const accessToken = await getAccessToken();
+        const challengesPath = join(__dirname, '..', 'static', 'challenges.json');
+        const challenges: ChallengeConfig[] = JSON.parse(readFileSync(challengesPath, 'utf8'));
+
         for (const challenge of challenges) {
             console.log(`\nProcessing challenge: ${challenge.name}`);
             const allActivities = await fetchAllActivities(accessToken, challenge.startDate);
@@ -174,14 +172,8 @@ async function main() {
             writeFileSync(outputPath, JSON.stringify(filteredActivities, null, 2));
             console.log(`Activities saved to ${outputPath}`);
         }
-
     } catch (error) {
         console.error('Error:', error);
         process.exit(1);
     }
-}
-
-// Only run main when executed directly (not when imported for tests)
-if (import.meta.url === `file://${process.argv[1]}`) {
-    main().catch(console.error);
 }

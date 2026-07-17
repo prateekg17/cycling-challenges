@@ -31,7 +31,7 @@
     </main>
 
     <!-- Challenge detail: back-link row (shown only in detail view) -->
-    <div id="challenge-detail-nav" class="challenge-tabs" role="navigation" aria-label="Challenge navigation" hidden>
+    <nav id="challenge-detail-nav" class="challenge-tabs" aria-label="Challenge navigation" hidden>
         <div class="challenge-tabs-inner">
             <div class="challenge-detail-header">
                 <button type="button" class="back-link" id="back-to-challenges">&#8592; All Challenges</button>
@@ -41,9 +41,7 @@
             <div class="challenge-tabs-list" style="display:none;"></div>
             <span class="view-toggle"><button type="button" id="toggle-table-view"></button></span>
         </div>
-    </div>
-
-    <!-- Challenge detail: activity content -->
+    </nav>
     <main id="challenge-detail" hidden>
         <section id="activities" style="margin-top:2em;"></section>
         <section id="table-view" style="margin-top:2em;"></section>
@@ -58,6 +56,6 @@
             </a>
         </div>
     </footer>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
