@@ -244,8 +244,6 @@ async function fetchActivities(challenge) {
             return;
         }
 
-        renderCardView(activities);
-
         const savedMode = localStorage.getItem('viewMode');
         const mode = (savedMode === 'table' || savedMode === 'card') ? savedMode : 'heatmap';
         switchView(mode);
@@ -468,6 +466,7 @@ function renderCardView(activities) {
 const _calTooltip = (() => {
     const el = document.createElement('div');
     el.className = 'heatmap-tooltip';
+    el.style.display = 'none';
     document.body.appendChild(el);
 
     document.addEventListener('mousemove', e => {
@@ -513,10 +512,7 @@ function renderHeatmapView(activities) {
             const cell = e.target.closest('.heatmap-calendar__cell[data-tooltip]');
             if (cell) _calTooltip.show(cell.dataset.tooltip);
         });
-        calendarEl.addEventListener('mouseout', e => {
-            if (!e.target.closest('.heatmap-calendar__cell[data-tooltip]')) return;
-            _calTooltip.hide();
-        });
+        calendarEl.addEventListener('mouseleave', () => _calTooltip.hide());
     }
 
     // ── Initialise or reinitialise Leaflet map ──────────────────────────
@@ -753,7 +749,9 @@ function switchView(mode) {
     elements.btnHeatmap.classList.toggle('active', mode === 'heatmap');
 
     // Render the selected view
-    if (mode === 'table') {
+    if (mode === 'card') {
+        renderCardView(activitiesData);
+    } else if (mode === 'table') {
         renderTableView();
     } else if (mode === 'heatmap') {
         renderHeatmapView(activitiesData);
