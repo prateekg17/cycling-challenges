@@ -109,8 +109,8 @@
     position: relative;
 }
 
-.heatmap-calendar__cell[title]:hover::after {
-    content: attr(title);
+.heatmap-calendar__cell[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
     position: absolute;
     bottom: calc(100% + 4px);
     left: 50%;

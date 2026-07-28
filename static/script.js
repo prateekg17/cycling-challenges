@@ -520,7 +520,11 @@ function renderHeatmapView(activities) {
         });
 
         const distKm = a.distance ? (a.distance / 1000).toFixed(2) + ' km' : 'N/A';
-        line.bindTooltip(`<strong>${a.name}</strong><br>${distKm}`, { sticky: true });
+        const tooltipEl = document.createElement('div');
+        const strong = tooltipEl.appendChild(document.createElement('strong'));
+        strong.textContent = a.name;
+        tooltipEl.appendChild(document.createTextNode(' - ' + distKm));
+        line.bindTooltip(tooltipEl, { sticky: true });
         line.addTo(routeLayerGroup);
         allBounds.push(...coords);
     });
@@ -611,13 +615,14 @@ function buildCalendarHTML(activities) {
     let week = [];
 
     const _padDate = n => String(n).padStart(2, '0');
-    const startTime = startDay.getTime();
-    const endTime   = lastDate.getTime();
     const msPerDay  = 86400000;
-    const totalDays = Math.round((endTime - startTime) / msPerDay) + 1;
+    // Use setDate-based iteration anchored to startDay to avoid DST
+    // millisecond drift (days are not always exactly 86400000ms).
+    const totalDays = Math.round((lastDate.getTime() - startDay.getTime()) / msPerDay) + 1;
 
     for (let day = 0; day < totalDays; day++) {
-        const d = new Date(startTime + day * msPerDay);
+        const d = new Date(startDay);
+        d.setDate(startDay.getDate() + day);
         const key = `${d.getFullYear()}-${_padDate(d.getMonth() + 1)}-${_padDate(d.getDate())}`;
         const dist = rideByDate.get(key) || 0;
         week.push({ key, dist });
@@ -642,7 +647,7 @@ function buildCalendarHTML(activities) {
     const cellTitle = (key, dist) => {
         if (!key) return '';
         const label = dist > 0 ? `${key}: ${(dist / 1000).toFixed(1)} km` : `${key}: Rest day`;
-        return `title="${label}"`;
+        return `data-tooltip="${label}" aria-label="${label}"`;
     };
 
     // Month labels: record which week each month first appears in
