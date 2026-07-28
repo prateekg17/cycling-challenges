@@ -25,7 +25,7 @@ The site features automated data fetching, parallel API calls, and an interactiv
 - Fetches activities from Strava API with pre-configured authentication
 - Filters activities by the challenge start date and keyword defined in `static/challenges.json`
 - Parallel fetching of activity pages for faster data collection
-- Interactive web UI with card and table views
+- Interactive web UI with card, table, and heatmap views
 - **Follow Me on Strava** badge in header
 - **No user authentication required** - data is pre-fetched and served statically
 - **Unit tests** (Vitest) for core data logic and API helper functions
@@ -112,9 +112,10 @@ npx vitest
 The web UI has two screens:
 - **Challenges home screen**: Themed tiles, one per challenge, showing name, description, and live progress. Clicking a tile navigates to that challenge's detail view.
 - **Challenge detail view**: Back link ("<- All Challenges") to return home, challenge name in the header, and the full activity list below.
-- **Toggle View Button**: Switch between card and tabular views within a challenge.
+- **Toggle View Button**: Switch between card, table, and heatmap views within a challenge.
 - **Card View**: Each activity shows ride name, date, stats, description (if present).
 - **Tabular View**: Sortable columns (name, date, distance, time, speed, elevation) with totals/averages.
+- **Heatmap View**: All ride routes overlaid on an interactive dark map, with a stats summary row (total rides, distance, elevation, avg speed) and a distance-intensity calendar grid showing ride days across the challenge date range.
 - **Empty State Message**: Clear message when no activities match the filter.
 - **View Persistence**: Preferred view stored in `localStorage`.
 
@@ -139,7 +140,7 @@ The web UI has two screens:
 - `scripts/fetch-activities.ts` - Strava fetch & processing (ESM / NodeNext); reads `static/challenges.json` for per-challenge config
 - `scripts/fetch-activities.test.ts` - Unit tests (Vitest, mocked fetch)
 - `static/challenges.json` - Challenge config (single source of truth for both backend and frontend)
-- `static/` - Site assets (`index.html`, `css/` (six CSS modules), `script.js`, per-challenge activity JSON files, images)
+- `static/` - Site assets (`index.html`, `css/` (seven CSS modules), `script.js`, per-challenge activity JSON files, images)
 - `package.json` - Dependencies & scripts
 - `tsconfig.json` - TypeScript config (ES2022 target, NodeNext resolution)
 

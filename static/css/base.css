@@ -81,3 +81,35 @@ a {
         padding: 0 1rem;
     }
 }
+
+/* ── Three-way view toggle buttons ─────────────────────────────────────── */
+
+.view-toggle {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.view-btn {
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.8rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.view-btn:hover {
+    background: var(--bg-surface-hover);
+    color: var(--text-primary);
+}
+
+.view-btn.active {
+    background: color-mix(in srgb, var(--gradient-to) 30%, var(--bg-surface));
+    color: var(--gradient-to);
+    border-color: var(--gradient-to);
+    font-weight: 500;
+}
