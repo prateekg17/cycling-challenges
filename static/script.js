@@ -247,7 +247,7 @@ async function fetchActivities(challenge) {
         renderCardView(activities);
 
         const savedMode = localStorage.getItem('viewMode');
-        const mode = (savedMode === 'table' || savedMode === 'heatmap') ? savedMode : 'card';
+        const mode = (savedMode === 'table' || savedMode === 'card') ? savedMode : 'heatmap';
         switchView(mode);
 
     } catch (error) {
@@ -461,6 +461,27 @@ function renderCardView(activities) {
 // Heatmap view
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Calendar tooltip (body-level, never clipped by ancestors)
+// ---------------------------------------------------------------------------
+
+const _calTooltip = (() => {
+    const el = document.createElement('div');
+    el.className = 'heatmap-tooltip';
+    document.body.appendChild(el);
+
+    document.addEventListener('mousemove', e => {
+        if (el.style.display === 'none') return;
+        el.style.left = (e.clientX + 12) + 'px';
+        el.style.top  = (e.clientY + 12) + 'px';
+    });
+
+    return {
+        show(text) { el.textContent = text; el.style.display = 'block'; },
+        hide()     { el.style.display = 'none'; }
+    };
+})();
+
 /**
  * Render the heatmap view: route map + stats row + distance calendar.
  * @param {Activity[]} activities
@@ -484,6 +505,19 @@ function renderHeatmapView(activities) {
             ${buildCalendarHTML(activities)}
         </div>
     `;
+
+    // ── Calendar tooltip via event delegation ───────────────────────────
+    const calendarEl = section.querySelector('.heatmap-calendar__grid');
+    if (calendarEl) {
+        calendarEl.addEventListener('mouseover', e => {
+            const cell = e.target.closest('.heatmap-calendar__cell[data-tooltip]');
+            if (cell) _calTooltip.show(cell.dataset.tooltip);
+        });
+        calendarEl.addEventListener('mouseout', e => {
+            if (!e.target.closest('.heatmap-calendar__cell[data-tooltip]')) return;
+            _calTooltip.hide();
+        });
+    }
 
     // ── Initialise or reinitialise Leaflet map ──────────────────────────
     if (leafletMap) {
@@ -646,7 +680,7 @@ function buildCalendarHTML(activities) {
 
     const cellTitle = (key, dist) => {
         if (!key) return '';
-        const label = dist > 0 ? `${key}: ${(dist / 1000).toFixed(1)} km` : `${key}: Rest day`;
+        const label = dist > 0 ? `${key}: ${(dist / 1000).toFixed(1)} km` : key;
         return `data-tooltip="${label}" aria-label="${label}"`;
     };
 
