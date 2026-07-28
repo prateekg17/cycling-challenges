@@ -62,6 +62,7 @@
     background: color-mix(in srgb, var(--gradient-from) 18%, var(--bg-surface));
     border: 1px solid var(--border);
     border-radius: var(--card-radius);
+    overflow: visible;
 }
 
 .heatmap-calendar__heading {
@@ -91,6 +92,7 @@
     gap: 3px;
     flex-wrap: wrap;
     align-items: flex-start;
+    overflow: visible;
 }
 
 .heatmap-calendar__week {
@@ -106,15 +108,10 @@
     background: color-mix(in srgb, var(--gradient-from) 30%, #000);
     cursor: default;
     flex-shrink: 0;
-    position: relative;
 }
 
-.heatmap-calendar__cell[data-tooltip]:hover::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: calc(100% + 4px);
-    left: 50%;
-    transform: translateX(-50%);
+.heatmap-tooltip {
+    position: fixed;
     background: #1a1a2e;
     color: #fff;
     font-size: 0.7rem;
@@ -123,7 +120,8 @@
     border-radius: 4px;
     border: 1px solid var(--border);
     pointer-events: none;
-    z-index: 10;
+    z-index: 9999;
+    display: none;
 }
 
 .heatmap-calendar__legend {
