@@ -696,14 +696,15 @@ function buildCalendarHTML(activities) {
         }
     });
 
+    const cellWidth = 13 + 3; // cell width + gap
     const monthRow = `
-        <div class="heatmap-calendar__months">
-            ${weeks.map((_, wi) => `<div class="heatmap-calendar__month-label" style="width:${13 + 3}px;overflow:visible;white-space:nowrap;">${monthLabels[wi]}</div>`).join('')}
+        <div class="heatmap-calendar__months" style="position:relative;height:1.2em;margin-bottom:4px;min-width:${weeks.length * cellWidth}px;">
+            ${weeks.map((_, wi) => monthLabels[wi] ? `<span class="heatmap-calendar__month-label" style="position:absolute;left:${wi * cellWidth}px;">${monthLabels[wi]}</span>` : '').join('')}
         </div>
     `;
 
     const gridHTML = `
-        <div class="heatmap-calendar__grid">
+        <div class="heatmap-calendar__grid" style="min-width:${weeks.length * cellWidth}px;">
             ${weeks.map(w => `
                 <div class="heatmap-calendar__week">
                     ${w.map(({ key, dist }) => `
@@ -726,7 +727,7 @@ function buildCalendarHTML(activities) {
         </div>
     `;
 
-    return monthRow + gridHTML + legendHTML;
+    return `<div class="heatmap-calendar__scroll">${monthRow}${gridHTML}</div>${legendHTML}`;
 }
 
 // ---------------------------------------------------------------------------

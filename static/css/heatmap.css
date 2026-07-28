@@ -62,7 +62,12 @@
     background: color-mix(in srgb, var(--gradient-from) 18%, var(--bg-surface));
     border: 1px solid var(--border);
     border-radius: var(--card-radius);
-    overflow: visible;
+}
+
+.heatmap-calendar__scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
 }
 
 .heatmap-calendar__heading {
@@ -74,25 +79,21 @@
 }
 
 .heatmap-calendar__months {
-    display: flex;
-    gap: 0;
-    margin-bottom: 4px;
-    padding-left: 0;
+    overflow: visible;
 }
 
 .heatmap-calendar__month-label {
     font-size: 0.65rem;
     color: var(--text-secondary);
-    min-width: 0;
+    white-space: nowrap;
 }
 
 .heatmap-calendar__grid {
     display: flex;
     flex-direction: row;
     gap: 3px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: flex-start;
-    overflow: visible;
 }
 
 .heatmap-calendar__week {
