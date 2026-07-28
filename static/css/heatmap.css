@@ -1,0 +1,143 @@
+/*
+ * heatmap.css
+ * Styles for the heatmap view: map container, stats row, calendar grid.
+ * Relies on --gradient-from and --gradient-to set per-challenge by script.js.
+ */
+
+/* ── Map container ─────────────────────────────────────────────────────── */
+
+#heatmap-map {
+    width: 100%;
+    height: 500px;
+    border-radius: var(--card-radius);
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--gradient-from) 30%, #000);
+}
+
+/* ── Stats summary row ─────────────────────────────────────────────────── */
+
+.heatmap-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.heatmap-stat {
+    background: color-mix(in srgb, var(--gradient-from) 25%, var(--bg-surface));
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.heatmap-stat__value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--gradient-to);
+    line-height: 1;
+}
+
+.heatmap-stat__label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+@media (max-width: 700px) {
+    .heatmap-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ── Calendar grid ─────────────────────────────────────────────────────── */
+
+.heatmap-calendar {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    background: color-mix(in srgb, var(--gradient-from) 18%, var(--bg-surface));
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+}
+
+.heatmap-calendar__heading {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gradient-to);
+    margin-bottom: 0.75rem;
+}
+
+.heatmap-calendar__months {
+    display: flex;
+    gap: 0;
+    margin-bottom: 4px;
+    padding-left: 0;
+}
+
+.heatmap-calendar__month-label {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    min-width: 0;
+}
+
+.heatmap-calendar__grid {
+    display: flex;
+    flex-direction: row;
+    gap: 3px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.heatmap-calendar__week {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.heatmap-calendar__cell {
+    width: 13px;
+    height: 13px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--gradient-from) 30%, #000);
+    cursor: default;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.heatmap-calendar__cell[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a2e;
+    color: #fff;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    padding: 3px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.heatmap-calendar__legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 0.6rem;
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+}
+
+.heatmap-calendar__legend-cell {
+    width: 13px;
+    height: 13px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
