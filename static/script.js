@@ -524,14 +524,16 @@ function renderHeatmapView(activities) {
 
     leafletMap = L.map('heatmap-map');
 
-    L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-        {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 19
-        }
-    ).addTo(leafletMap);
+    // NOTE: No CARTO API key is set here. CARTO's vector basemaps are not
+    // currently key-gated (only raster tiles are, as of the "API KEY REQUIRED"
+    // watermark issue we hit). If CARTO extends the key requirement to vector
+    // basemaps in future and this watermark reappears, see
+    // https://carto.com/basemaps/apikey/ to request a free key and append
+    // `?key=YOUR_KEY` to the style URL below.
+    L.maplibreGL({
+        style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(leafletMap);
 
     routeLayerGroup = L.layerGroup().addTo(leafletMap);
 
