@@ -1,3 +1,5 @@
+import { createChallengeTile } from './challenge-tile.js';
+
 /**
  * @typedef {Object} Activity
  * @property {number} id - Activity ID
@@ -75,26 +77,7 @@ function showView(view) {
  * until data is loaded on first navigation into a challenge).
  */
 function renderHomeScreen() {
-    elements.homeScreen.innerHTML = `
-        ${CHALLENGES.map(c => `
-            <button
-                class="challenge-tile"
-                style="background: linear-gradient(135deg, ${c.gradient[0]}, ${c.gradient[1]});"
-                data-slug="${c.slug}"
-                aria-label="Open ${c.name}"
-            >
-                <p class="challenge-tile__status">Active</p>
-                <h2 class="challenge-tile__name">${c.name}</h2>
-                <p class="challenge-tile__description">${c.description}</p>
-                <div class="challenge-tile__progress">
-                    <div class="challenge-tile__progress-bar">
-                        <div class="challenge-tile__progress-fill" style="width:0;"></div>
-                    </div>
-                    <span class="challenge-tile__progress-pct">0 / ${c.targetRideCount} rides</span>
-                </div>
-            </button>
-        `).join('')}
-    `;
+    elements.homeScreen.replaceChildren(...CHALLENGES.map(createChallengeTile));
 
     // Wire up tile clicks
     elements.homeScreen.querySelectorAll('.challenge-tile').forEach(tile => {

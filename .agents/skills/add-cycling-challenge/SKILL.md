@@ -16,6 +16,7 @@ Read these files before proposing changes:
 - `static/challenges.json` for existing challenges and naming conventions.
 - `scripts/fetch-activities.ts` for the config type and matching behavior.
 - `static/script.js` for routing, tile markup, progress, and theme usage.
+- `static/challenge-tile.js` for safe challenge tile rendering.
 - `static/css/base.css` and `static/css/home.css` for the visual preview.
 - `package.json` for available validation commands.
 
@@ -65,8 +66,14 @@ and data file, without having to choose them manually.
 ## Show a visual proposal before editing
 
 Show both color options as actual rendered challenge tiles, not just hex codes.
-Reuse the current `.challenge-tile` markup and site CSS so the preview reflects
-the real design. Show the proposed name, description, and `0 / <targetRideCount> rides` progress.
+Reuse `createChallengeTile()` from `static/challenge-tile.js` and the site CSS
+when serving a local preview, or reproduce its fixed markup and safe DOM assignments
+for a standalone preview. Set display text with `textContent`, attributes with
+`setAttribute`/DOM properties, and colors with `style` properties. Never interpolate
+user-derived values into HTML markup, inline event handlers, or executable scripts;
+JSON encoding alone does not make values safe to embed in HTML. Treat names and
+descriptions as plain text, preserving quotes, apostrophes, and HTML-like wording.
+Show the proposed name, description, and `0 / <targetRideCount> rides` progress.
 Label each option and display its two hex colors outside the tile. Explain that
 the chosen colors also tint cards, tables, map routes, and the distance calendar.
 The zero count is a placeholder, not a prediction of existing Strava matches.
@@ -108,6 +115,8 @@ approved proposal now conflicts, propose a replacement and obtain fresh approval
 Parse the updated JSON and verify the exact approved values, all eight fields,
 unique slugs and data filenames across the config, a positive integer target,
 a nonempty keyword, a valid explicitly zoned timestamp, and exactly two hex colors.
+Check that the preview renders the proposed name and description literally as
+text, including any quotes or HTML-like content, rather than interpreting markup.
 Verify the new activity file parses as an empty array and all pre-existing
 challenge entries and files remain unchanged.
 
