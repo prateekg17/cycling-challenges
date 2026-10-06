@@ -26,7 +26,7 @@ export interface ChallengeConfig {
     description: string;
     dataFile: string;
     gradient: [string, string];
-    total: number;
+    targetRideCount: number;
     filterKeyword: string;
     startDate: string;
 }

@@ -2,6 +2,8 @@
 
 A GitHub Pages static site that tracks personal cycling challenges. The site automatically updates weekly with new Strava activities via a scheduled GitHub Action.
 
+Add a new challenge in plain language with the [add-cycling-challenge skill](#add-cycling-challenge-skill), available to AI assistants.
+
 The site supports multiple cycling challenges. Currently active: the Tube Terminus Challenge - cycling to and from all 33 terminus stations on the London Underground network from home.
 
 There are a total of 33 such Tube stations spread across the following lines:
@@ -127,14 +129,32 @@ The web UI has two screens:
 5. **Artifact**: Entire `static` folder uploaded as `site-static`; deployment job publishes it to Pages.
 6. **Frontend**: On load, the site fetches `challenges.json` to build the challenges list, then fetches each challenge's activity file to render the UI.
 
+## Add-cycling-challenge Skill
+
+The [add-cycling-challenge skill](.agents/skills/add-cycling-challenge/SKILL.md) helps you add a keyword-based challenge without knowing the project's configuration or file layout.
+
+Open this repository in GitHub Copilot or another AI assistant and describe your idea, for example:
+
+> Use the add-cycling-challenge skill to add a challenge to cycle to 10 London parks, starting 1 November 2026.
+
+Both tools discover the skill in `.agents/skills/add-cycling-challenge/`; no separate installation or registration file is needed. If it is not listed after adding it locally, start a fresh conversation in the same checkout. A commit is not required to try it locally.
+
+The skill explicitly asks you to provide or confirm the exact Strava keyword, then gathers the target ride count and start date. It infers a name, description, URL slug, and activity filename, and shows two visual color previews. You approve the configuration and colors before it adds the challenge and an empty activity data file.
+
+Progress counts activities whose name or description contains your keyword, case-insensitively. It does not verify unique destinations or routes. Add the keyword to qualifying Strava activities; data populates when the fetch/deploy workflow runs.
+
+To try the skill without changing challenge files, add **"Show the previews, but stop before editing repository files"** to your prompt. The skill does not commit, push, or deploy unless explicitly requested.
+
 ## Configuration
 - **Schedule**: Edit cron in `.github/workflows/update-activities.yaml`.
-- **Adding a challenge**: Add an entry to `static/challenges.json` with `slug`, `name`, `description`, `dataFile`, `gradient`, `total`, `filterKeyword`, and `startDate`. Commit a placeholder `static/<dataFile>` and trigger the workflow.
+- **Adding a challenge**: Add an entry to `static/challenges.json` with `slug`, `name`, `description`, `dataFile`, `gradient`, `targetRideCount`, `filterKeyword`, and `startDate`. `targetRideCount` is the target number of qualifying rides, not a distance or a count of verified destinations. Commit a placeholder `static/<dataFile>` and trigger the workflow.
+- **Guided challenge creation**: Use the [add-cycling-challenge skill](#add-cycling-challenge-skill) for a plain-language, preview-first setup.
 - **Keyword filter / start date**: Edit the relevant entry in `static/challenges.json`.
 - **Parallelism**: Change `maxPages` in `fetchAllActivities` inside `scripts/fetch-activities.ts` (default 10).
 - **Tests**: Add more cases under `scripts/*.test.ts` (Vitest auto-detects by pattern).
 
 ## Project Structure
+- `.agents/skills/add-cycling-challenge/SKILL.md` - Guided challenge creation skill for AI assistants (Copilot, ChatGPT, etc.)
 - `.github/workflows/update-activities.yaml` - Scheduled Strava fetch & deploy (artifact: `site-static`)
 - `.github/workflows/test.yaml` - PR test CI
 - `scripts/fetch-activities.ts` - Strava fetch & processing (ESM / NodeNext); reads `static/challenges.json` for per-challenge config

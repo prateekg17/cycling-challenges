@@ -5,7 +5,7 @@
     "description": "Cycle to all 33 London Underground terminus stations from home and back in a single ride per station.",
     "dataFile": "activities-terminus.json",
     "gradient": ["#1b4332", "#40916c"],
-    "total": 33,
+    "targetRideCount": 33,
     "filterKeyword": "terminus",
     "startDate": "2025-03-22T00:00:00Z"
   }
