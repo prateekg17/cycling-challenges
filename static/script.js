@@ -1,3 +1,5 @@
+import { createChallengeTile } from './challenge-tile.js';
+
 /**
  * @typedef {Object} Activity
  * @property {number} id - Activity ID
@@ -16,7 +18,7 @@
  * @property {string} description - Subtitle shown on the home tile
  * @property {string} dataFile - Filename inside static/ e.g. 'activities-terminus.json'
  * @property {string[]} gradient - Two CSS colour stops [from, to]
- * @property {number} total - Target total count for progress bar
+ * @property {number} targetRideCount - Target number of qualifying rides for progress
  */
 
 /** @type {Challenge[]} */
@@ -75,26 +77,7 @@ function showView(view) {
  * until data is loaded on first navigation into a challenge).
  */
 function renderHomeScreen() {
-    elements.homeScreen.innerHTML = `
-        ${CHALLENGES.map(c => `
-            <button
-                class="challenge-tile"
-                style="background: linear-gradient(135deg, ${c.gradient[0]}, ${c.gradient[1]});"
-                data-slug="${c.slug}"
-                aria-label="Open ${c.name}"
-            >
-                <p class="challenge-tile__status">Active</p>
-                <h2 class="challenge-tile__name">${c.name}</h2>
-                <p class="challenge-tile__description">${c.description}</p>
-                <div class="challenge-tile__progress">
-                    <div class="challenge-tile__progress-bar">
-                        <div class="challenge-tile__progress-fill" style="width:0;"></div>
-                    </div>
-                    <span class="challenge-tile__progress-pct">0 / ${c.total}</span>
-                </div>
-            </button>
-        `).join('')}
-    `;
+    elements.homeScreen.replaceChildren(...CHALLENGES.map(createChallengeTile));
 
     // Wire up tile clicks
     elements.homeScreen.querySelectorAll('.challenge-tile').forEach(tile => {
@@ -125,12 +108,12 @@ async function prefetchProgress(challenge) {
         const tile = elements.homeScreen.querySelector(`[data-slug="${challenge.slug}"]`);
         if (!tile) return;
         const count = activities.length;
-        const pct = challenge.total > 0 ? Math.min(100, Math.round(count / challenge.total * 100)) : 0;
+        const pct = challenge.targetRideCount > 0 ? Math.min(100, Math.round(count / challenge.targetRideCount * 100)) : 0;
         tile.querySelector('.challenge-tile__status').textContent =
-            `Active - ${count} of ${challenge.total} complete`;
+            `Active - ${count} of ${challenge.targetRideCount} rides complete`;
         tile.querySelector('.challenge-tile__progress-fill').style.width = pct + '%';
         tile.querySelector('.challenge-tile__progress-pct').textContent =
-            `${count} / ${challenge.total}`;
+            `${count} / ${challenge.targetRideCount} rides`;
     } catch (err) {
         // Silent fail - tile stays at 0 if network is unavailable
         console.debug('prefetchProgress failed for', challenge.slug, err);
@@ -229,12 +212,12 @@ async function fetchActivities(challenge) {
         const tile = elements.homeScreen.querySelector(`[data-slug="${challenge.slug}"]`);
         if (tile) {
             const count = activities.length;
-            const pct = challenge.total > 0 ? Math.min(100, Math.round(count / challenge.total * 100)) : 0;
+            const pct = challenge.targetRideCount > 0 ? Math.min(100, Math.round(count / challenge.targetRideCount * 100)) : 0;
             tile.querySelector('.challenge-tile__status').textContent =
-                `Active - ${count} of ${challenge.total} complete`;
+                `Active - ${count} of ${challenge.targetRideCount} rides complete`;
             tile.querySelector('.challenge-tile__progress-fill').style.width = pct + '%';
             tile.querySelector('.challenge-tile__progress-pct').textContent =
-                `${count} / ${challenge.total}`;
+                `${count} / ${challenge.targetRideCount} rides`;
         }
 
         if (activities.length === 0) {
