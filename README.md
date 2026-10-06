@@ -137,7 +137,7 @@ Open this repository in GitHub Copilot or another AI assistant and describe your
 
 > Use the add-cycling-challenge skill to add a challenge to cycle to 10 London parks, starting 1 November 2026.
 
-Both tools discover the skill in `.agents/skills/add-cycling-challenge/`; no separate installation or registration file is needed. If it is not listed after adding it locally, start a fresh conversation in the same checkout. A commit is not required to try it locally.
+GitHub Copilot discovers this repository skill in supported agent-mode environments; no separate registration file is needed. Other assistants require an Agent Skills-compatible host or manual loading, so consult that tool's documentation. If Copilot does not list the skill after adding it locally, start a fresh conversation in the same checkout. A commit is not required to try it locally.
 
 The skill explicitly asks you to provide or confirm the exact Strava keyword, then gathers the target ride count and start date. It infers a name, description, URL slug, and activity filename, and shows two visual color previews. You approve the configuration and colors before it adds the challenge and an empty activity data file.
 
