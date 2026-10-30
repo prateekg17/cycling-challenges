@@ -35,7 +35,7 @@ The site features automated data fetching, parallel API calls, and an interactiv
 - **Concurrency control** prevents overlapping update/deploy runs
 
 ## Architecture
-- **Frontend**: Static HTML/CSS/JavaScript served via GitHub Pages
+- **Frontend**: Static HTML/CSS served via GitHub Pages, with browser modules authored in TypeScript
 - **Data Source**: Weekly GitHub Action fetches Strava data and generates a per-challenge activities JSON file
 - **Challenge Config**: `static/challenges.json` is the single source of truth - read by the backend fetcher and served to the frontend
 - **Deployment**: Automatic GitHub Pages deployment after data updates
@@ -83,14 +83,19 @@ The site features automated data fetching, parallel API calls, and an interactiv
 4. Fetch activities & build:
    ```sh
    npm run fetch-activities
+   npm run build:frontend
    ```
 5. Serve locally:
    ```sh
-   npx serve static -l 8080
+   npx serve dist/site -l 8080
    # or
-   (cd static && python3 -m http.server 8080)
+   (cd dist/site && python3 -m http.server 8080)
    ```
 6. Open: http://localhost:8080
+
+Run `npm run build:frontend` again after changing frontend sources or static assets.
+It rebuilds `dist/site/` without writing generated JavaScript into `static/`.
+The Strava fetch is optional when using the existing activity JSON files.
 
 ### Running Tests
 Tests mock network I/O and do not require Strava credentials.
@@ -104,9 +109,10 @@ npx vitest
 
 ## Continuous Integration (CI)
 - **Workflow**: `.github/workflows/test.yaml` runs on pull requests (open, reopen, synchronize, label) and executes the Vitest suite.
+- **Type-checking**: CI runs `npm run typecheck` for backend, browser, and test TypeScript.
 - **Strava credentials not required** for tests (fetch is mocked).
 - **Scheduled fetch & deploy**: `.github/workflows/update-activities.yaml` handles weekly data refresh and Pages deployment.
-- **Page deployment artifact name**: `site-static` (contains the entire `static/` directory including `index.html`, images, `challenges.json`, and per-challenge activity JSON files).
+- **Page deployment artifact name**: `site-static` (contains `dist/site/`: compiled browser modules, `index.html`, CSS, images, `challenges.json`, and per-challenge activity JSON files; excludes TypeScript sources and tests).
 - **No duplicate runs**: Concurrency group `update-activities` prevents overlapping scheduled/manual executions.
 - The committed per-challenge activity JSON files (e.g. `static/activities-terminus.json`) are placeholders; the workflow overwrites them during the run and ships the updated files inside the deployment artifact.
 
@@ -126,7 +132,7 @@ The web UI has two screens:
 2. **Challenge config**: `static/challenges.json` defines each challenge's `filterKeyword`, `startDate`, and `dataFile`.
 3. **Filtering**: For each challenge, only activities after its `startDate` containing its `filterKeyword` in name or description are kept.
 4. **Output**: Filtered list written to `static/<dataFile>` (e.g. `activities-terminus.json`) in the runner workspace.
-5. **Artifact**: Entire `static` folder uploaded as `site-static`; deployment job publishes it to Pages.
+5. **Artifact**: Build the frontend and copy static assets into `dist/site/`, then upload it as `site-static`; the deployment job publishes it to Pages.
 6. **Frontend**: On load, the site fetches `challenges.json` to build the challenges list, then fetches each challenge's activity file to render the UI.
 
 ## Add-cycling-challenge Skill
@@ -160,9 +166,10 @@ To try the skill without changing challenge files, add **"Show the previews, but
 - `scripts/fetch-activities.ts` - Strava fetch & processing (ESM / NodeNext); reads `static/challenges.json` for per-challenge config
 - `scripts/fetch-activities.test.ts` - Unit tests (Vitest, mocked fetch)
 - `static/challenges.json` - Challenge config (single source of truth for both backend and frontend)
-- `static/` - Site assets (`index.html`, `css/` (seven CSS modules), `script.js`, per-challenge activity JSON files, images)
+- `static/` - Site source assets (`index.html`, `css/` (seven CSS modules), TypeScript frontend sources, per-challenge activity JSON files, images). Generated JavaScript is never written here.
+- `scripts/prepare-site.ts` - Packages static assets and compiled browser modules into `dist/site/` for local preview and deployment; generated output is not committed.
 - `package.json` - Dependencies & scripts
-- `tsconfig.json` - TypeScript config (ES2022 target, NodeNext resolution)
+- `tsconfig.json`, `tsconfig.frontend.json` - TypeScript configs for Node and browser code (ES2022, NodeNext)
 
 ## Notes on ESM / NodeNext
 - Project uses `"type": "module"` and `"moduleResolution": "NodeNext"`.

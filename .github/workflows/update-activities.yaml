@@ -43,12 +43,15 @@ jobs:
           STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
           STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
         run: npm run fetch-activities
+
+      - name: Build frontend
+        run: npm run build:frontend
         
       - name: Upload site artifact
         uses: actions/upload-artifact@v7
         with:
           name: site-static
-          path: static
+          path: dist/site
           if-no-files-found: error
           retention-days: 1
 
@@ -64,12 +67,12 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: site-static
-          path: static
+          path: dist/site
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: static
+          path: dist/site
           
       - name: Deploy to GitHub Pages
         id: deployment

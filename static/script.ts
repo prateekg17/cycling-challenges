@@ -1,28 +1,52 @@
 import { createChallengeTile } from './challenge-tile.js';
 
-/**
- * @typedef {Object} Activity
- * @property {number} id - Activity ID
- * @property {string} name - Activity name
- * @property {string} [description] - Activity description
- * @property {string} [start_date] - ISO date string
- * @property {number} [distance] - Distance in meters
- * @property {number} [moving_time] - Moving time in seconds
- * @property {number} [total_elevation_gain] - Elevation gain in meters
- */
+interface Activity {
+    id: number;
+    name: string;
+    description?: string;
+    start_date?: string;
+    start_date_local?: string;
+    distance?: number;
+    moving_time?: number;
+    total_elevation_gain?: number;
+    map?: { summary_polyline?: string };
+    _timestamp?: number;
+}
 
-/**
- * @typedef {Object} Challenge
- * @property {string} slug - URL hash fragment (without #)
- * @property {string} name - Display name
- * @property {string} description - Subtitle shown on the home tile
- * @property {string} dataFile - Filename inside static/ e.g. 'activities-terminus.json'
- * @property {string[]} gradient - Two CSS colour stops [from, to]
- * @property {number} targetRideCount - Target number of qualifying rides for progress
- */
+interface Challenge {
+    slug: string;
+    name: string;
+    description: string;
+    dataFile: string;
+    gradient: string[];
+    targetRideCount: number;
+}
 
-/** @type {Challenge[]} */
-let CHALLENGES = [];
+interface LeafletMap {
+    remove(): void;
+    fitBounds(bounds: unknown, options: { padding: [number, number] }): void;
+    setView(center: [number, number], zoom: number): void;
+    invalidateSize(): void;
+}
+
+interface LeafletLayerGroup {
+    addTo(map: LeafletMap): LeafletLayerGroup;
+}
+
+interface LeafletPolyline {
+    bindTooltip(content: HTMLElement, options: { sticky: boolean }): LeafletPolyline;
+    addTo(group: LeafletLayerGroup): LeafletPolyline;
+}
+
+declare const L: {
+    map(id: string): LeafletMap;
+    maplibreGL(options: { style: string; attribution: string }): { addTo(map: LeafletMap): unknown };
+    layerGroup(): { addTo(map: LeafletMap): LeafletLayerGroup };
+    polyline(coords: [number, number][], options: { color: string; opacity: number; weight: number }): LeafletPolyline;
+    latLngBounds(coords: [number, number][]): unknown;
+};
+
+let CHALLENGES: Challenge[] = [];
 
 // Common table cell styles for reuse
 const tableCellStyle = "padding:8px;border:1px solid #ccc;text-align:center;";
@@ -32,35 +56,30 @@ const tableCellStyleNoWrapLeft = "padding:8px;border:1px solid #ccc;text-align:l
 
 // Cache DOM elements
 const elements = {
-    homeScreen:       document.getElementById('home-screen'),
-    challengeDetail:  document.getElementById('challenge-detail'),
-    detailNav:        document.getElementById('challenge-detail-nav'),
-    detailTitle:      document.getElementById('challenge-detail-title'),
-    backBtn:          document.getElementById('back-to-challenges'),
-    activities:       document.getElementById('activities'),
-    tableView:        document.getElementById('table-view'),
-    heatmapView:      document.getElementById('heatmap-view'),
-    viewToggle:       document.querySelector('.view-toggle'),
-    btnCard:          document.getElementById('view-btn-card'),
-    btnTable:         document.getElementById('view-btn-table'),
-    btnHeatmap:       document.getElementById('view-btn-heatmap'),
+    homeScreen:       document.getElementById('home-screen')!,
+    challengeDetail:  document.getElementById('challenge-detail')!,
+    detailNav:        document.getElementById('challenge-detail-nav')!,
+    detailTitle:      document.getElementById('challenge-detail-title')!,
+    backBtn:          document.getElementById('back-to-challenges')!,
+    activities:       document.getElementById('activities')!,
+    tableView:        document.getElementById('table-view')!,
+    heatmapView:      document.getElementById('heatmap-view')!,
+    viewToggle:       document.querySelector<HTMLElement>('.view-toggle')!,
+    btnCard:          document.getElementById('view-btn-card')!,
+    btnTable:         document.getElementById('view-btn-table')!,
+    btnHeatmap:       document.getElementById('view-btn-heatmap')!,
 };
 
-/** @type {Activity[]} */
-let activitiesData = [];
+let activitiesData: Activity[] = [];
 
-/** @type {AbortController|null} - cancels any in-flight fetchActivities call */
-let currentFetchController = null;
+let currentFetchController: AbortController | null = null;
 
 // ---------------------------------------------------------------------------
 // View management
 // ---------------------------------------------------------------------------
 
-/**
- * Show either the home screen or the challenge detail view.
- * @param {'home'|'challenge'} view
- */
-function showView(view) {
+/** Show either the home screen or the challenge detail view. */
+function showView(view: 'home' | 'challenge') {
     const showHome = view === 'home';
     elements.homeScreen.hidden      = !showHome;
     elements.challengeDetail.hidden = showHome;
@@ -80,9 +99,9 @@ function renderHomeScreen() {
     elements.homeScreen.replaceChildren(...CHALLENGES.map(createChallengeTile));
 
     // Wire up tile clicks
-    elements.homeScreen.querySelectorAll('.challenge-tile').forEach(tile => {
+    elements.homeScreen.querySelectorAll<HTMLElement>('.challenge-tile').forEach(tile => {
         tile.addEventListener('click', () => {
-            window.location.hash = tile.dataset.slug;
+            window.location.hash = tile.dataset.slug!;
         });
     });
 
@@ -98,21 +117,20 @@ function renderHomeScreen() {
  * Fetch activity count for a challenge and update its home tile progress.
  * Runs in the background when the home screen is shown. Has no side-effects
  * on activitiesData or the card/table views.
- * @param {Challenge} challenge
  */
-async function prefetchProgress(challenge) {
+async function prefetchProgress(challenge: Challenge) {
     try {
         const res = await fetch('./' + challenge.dataFile);
         if (!res.ok) return;
-        const activities = await res.json();
+        const activities: Activity[] = await res.json();
         const tile = elements.homeScreen.querySelector(`[data-slug="${challenge.slug}"]`);
         if (!tile) return;
         const count = activities.length;
         const pct = challenge.targetRideCount > 0 ? Math.min(100, Math.round(count / challenge.targetRideCount * 100)) : 0;
-        tile.querySelector('.challenge-tile__status').textContent =
+        tile.querySelector<HTMLElement>('.challenge-tile__status')!.textContent =
             `Active - ${count} of ${challenge.targetRideCount} rides complete`;
-        tile.querySelector('.challenge-tile__progress-fill').style.width = pct + '%';
-        tile.querySelector('.challenge-tile__progress-pct').textContent =
+        tile.querySelector<HTMLElement>('.challenge-tile__progress-fill')!.style.width = pct + '%';
+        tile.querySelector<HTMLElement>('.challenge-tile__progress-pct')!.textContent =
             `${count} / ${challenge.targetRideCount} rides`;
     } catch (err) {
         // Silent fail - tile stays at 0 if network is unavailable
@@ -189,9 +207,8 @@ function showActivitiesView() {
 
 /**
  * Fetch and render activities for one challenge.
- * @param {Challenge} challenge - The challenge to load
  */
-async function fetchActivities(challenge) {
+async function fetchActivities(challenge: Challenge) {
     const dataFile = challenge.dataFile;
     const controller = new AbortController();
     currentFetchController = controller;
@@ -204,7 +221,7 @@ async function fetchActivities(challenge) {
         if (!res.ok) throw new Error(`Failed to load activities: ${res.status}`);
 
         showActivitiesView();
-        const activities = await res.json();
+        const activities: Activity[] = await res.json();
         activities.forEach(a => a._timestamp = a.start_date ? Date.parse(a.start_date) : 0);
         activitiesData = activities;
 
@@ -213,10 +230,10 @@ async function fetchActivities(challenge) {
         if (tile) {
             const count = activities.length;
             const pct = challenge.targetRideCount > 0 ? Math.min(100, Math.round(count / challenge.targetRideCount * 100)) : 0;
-            tile.querySelector('.challenge-tile__status').textContent =
+            tile.querySelector<HTMLElement>('.challenge-tile__status')!.textContent =
                 `Active - ${count} of ${challenge.targetRideCount} rides complete`;
-            tile.querySelector('.challenge-tile__progress-fill').style.width = pct + '%';
-            tile.querySelector('.challenge-tile__progress-pct').textContent =
+            tile.querySelector<HTMLElement>('.challenge-tile__progress-fill')!.style.width = pct + '%';
+            tile.querySelector<HTMLElement>('.challenge-tile__progress-pct')!.textContent =
                 `${count} / ${challenge.targetRideCount} rides`;
         }
 
@@ -232,7 +249,7 @@ async function fetchActivities(challenge) {
         switchView(mode);
 
     } catch (error) {
-        if (error.name === 'AbortError') return; // navigation cancelled this fetch
+        if (error instanceof DOMException && error.name === 'AbortError') return; // navigation cancelled this fetch
         console.error('Error loading activities:', error);
         elements.activities.innerHTML = '<p>Error loading activities. Please try again later.</p>';
         elements.activities.style.display = 'grid';
@@ -240,7 +257,7 @@ async function fetchActivities(challenge) {
     }
 }
 
-let tableSort = { column: null, asc: true };
+let tableSort: { column: 'date' | 'distance' | 'time' | 'speed' | 'elevation' | null; asc: boolean } = { column: null, asc: true };
 
 // ---------------------------------------------------------------------------
 // Table view
@@ -248,9 +265,8 @@ let tableSort = { column: null, asc: true };
 
 // Helper to format activity meta fields
 /**
- * @param {Activity} a
  */
-function formatActivityMeta(a) {
+function formatActivityMeta(a: Activity) {
     return {
         distance:  a.distance ? (a.distance / 1000).toFixed(2) + ' km' : 'N/A',
         time:      a.moving_time ? formatDuration(a.moving_time) : 'N/A',
@@ -261,13 +277,13 @@ function formatActivityMeta(a) {
 }
 
 function renderTableView() {
-    /** @type {Activity[]} */
     let sorted = [...activitiesData];
 
     // Sorting logic
     if (tableSort.column) {
         sorted.sort((a, b) => {
-            let aVal, bVal;
+            let aVal = 0;
+            let bVal = 0;
             switch(tableSort.column) {
                 case 'date':
                     aVal = a._timestamp || 0;
@@ -319,12 +335,12 @@ function renderTableView() {
     elements.tableView.style.marginRight = 'auto';
 
     // Build table header with sort indicators
-    const getSortIcon = column => {
+    const getSortIcon = (column: NonNullable<typeof tableSort.column>) => {
         if (tableSort.column !== column) return '';
         return `<span style='font-size:0.9em;'>${tableSort.asc ? '▲' : '▼'}</span>`;
     };
 
-    const getSortableColumnProps = column => {
+    const getSortableColumnProps = (column: NonNullable<typeof tableSort.column>) => {
         let ariaSort = 'none';
         if (tableSort.column === column) {
             ariaSort = tableSort.asc ? 'ascending' : 'descending';
@@ -389,7 +405,7 @@ function renderTableView() {
     `;
 
     // Add sorting event listeners
-    const handleSortClick = column => {
+    const handleSortClick = (column: NonNullable<typeof tableSort.column>) => {
         if (tableSort.column === column) {
             tableSort.asc = !tableSort.asc;
         } else {
@@ -399,11 +415,11 @@ function renderTableView() {
         renderTableView();
     };
 
-    document.getElementById('sort-distance').onclick  = () => handleSortClick('distance');
-    document.getElementById('sort-time').onclick      = () => handleSortClick('time');
-    document.getElementById('sort-speed').onclick     = () => handleSortClick('speed');
-    document.getElementById('sort-elevation').onclick = () => handleSortClick('elevation');
-    document.getElementById('sort-date').onclick      = () => handleSortClick('date');
+    document.getElementById('sort-distance')!.onclick  = () => handleSortClick('distance');
+    document.getElementById('sort-time')!.onclick      = () => handleSortClick('time');
+    document.getElementById('sort-speed')!.onclick     = () => handleSortClick('speed');
+    document.getElementById('sort-elevation')!.onclick = () => handleSortClick('elevation');
+    document.getElementById('sort-date')!.onclick      = () => handleSortClick('date');
 }
 
 // ---------------------------------------------------------------------------
@@ -412,9 +428,8 @@ function renderTableView() {
 
 // Render the card view for activities
 /**
- * @param {Activity[]} activities
  */
-function renderCardView(activities) {
+function renderCardView(activities: Activity[]) {
     if (!activities || activities.length === 0) {
         elements.activities.innerHTML = '<p>No activities found for this challenge.</p>';
         return;
@@ -459,16 +474,13 @@ const _calTooltip = (() => {
     });
 
     return {
-        show(text) { el.textContent = text; el.style.display = 'block'; },
+        show(text: string) { el.textContent = text; el.style.display = 'block'; },
         hide()     { el.style.display = 'none'; }
     };
 })();
 
-/**
- * Render the heatmap view: route map + stats row + distance calendar.
- * @param {Activity[]} activities
- */
-function renderHeatmapView(activities) {
+/** Render the heatmap view: route map + stats row + distance calendar. */
+function renderHeatmapView(activities: Activity[]) {
     const section = elements.heatmapView;
     if (!section) return;
 
@@ -492,8 +504,9 @@ function renderHeatmapView(activities) {
     const calendarEl = section.querySelector('.heatmap-calendar__grid');
     if (calendarEl) {
         calendarEl.addEventListener('mouseover', e => {
-            const cell = e.target.closest('.heatmap-calendar__cell[data-tooltip]');
-            if (cell) _calTooltip.show(cell.dataset.tooltip);
+            if (!(e.target instanceof Element)) return;
+            const cell = e.target.closest<HTMLElement>('.heatmap-calendar__cell[data-tooltip]');
+            if (cell?.dataset.tooltip) _calTooltip.show(cell.dataset.tooltip);
         });
         calendarEl.addEventListener('mouseleave', () => _calTooltip.hide());
     }
@@ -505,7 +518,8 @@ function renderHeatmapView(activities) {
         routeLayerGroup = null;
     }
 
-    leafletMap = L.map('heatmap-map');
+    const map = L.map('heatmap-map');
+    leafletMap = map;
 
     // NOTE: No CARTO API key is set here. CARTO's vector basemaps are not
     // currently key-gated (only raster tiles are, as of the "API KEY REQUIRED"
@@ -516,11 +530,12 @@ function renderHeatmapView(activities) {
     L.maplibreGL({
         style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-    }).addTo(leafletMap);
+    }).addTo(map);
 
-    routeLayerGroup = L.layerGroup().addTo(leafletMap);
+    const layerGroup = L.layerGroup().addTo(map);
+    routeLayerGroup = layerGroup;
 
-    const allBounds = [];
+    const allBounds: [number, number][] = [];
 
     activities.forEach(a => {
         const polyline = a.map?.summary_polyline;
@@ -540,24 +555,24 @@ function renderHeatmapView(activities) {
         strong.textContent = a.name;
         tooltipEl.appendChild(document.createTextNode(' - ' + distKm));
         line.bindTooltip(tooltipEl, { sticky: true });
-        line.addTo(routeLayerGroup);
+        line.addTo(layerGroup);
         allBounds.push(...coords);
     });
 
     if (allBounds.length > 0) {
-        leafletMap.fitBounds(L.latLngBounds(allBounds), { padding: [20, 20] });
+        map.fitBounds(L.latLngBounds(allBounds), { padding: [20, 20] });
     } else {
         // Fallback centre if no polylines available
-        leafletMap.setView([51.505, -0.09], 10);
+        map.setView([51.505, -0.09], 10);
     }
 
     // Allow the browser to apply CSS to the freshly-injected #heatmap-map
     // element before Leaflet recalculates its container size.
     requestAnimationFrame(() => {
-        if (leafletMap) {
-            leafletMap.invalidateSize();
+        if (leafletMap === map) {
+            map.invalidateSize();
             if (allBounds.length > 0) {
-                leafletMap.fitBounds(L.latLngBounds(allBounds), { padding: [20, 20] });
+                map.fitBounds(L.latLngBounds(allBounds), { padding: [20, 20] });
             }
         }
     });
@@ -565,10 +580,8 @@ function renderHeatmapView(activities) {
 
 /**
  * Build the four stats summary cells HTML.
- * @param {Activity[]} activities
- * @returns {string}
  */
-function buildStatsHTML(activities) {
+function buildStatsHTML(activities: Activity[]): string {
     const totals = activities.reduce((sum, a) => ({
         distance:    sum.distance    + (a.distance || 0),
         moving_time: sum.moving_time + (a.moving_time || 0),
@@ -596,15 +609,12 @@ function buildStatsHTML(activities) {
 
 /**
  * Build the distance calendar grid HTML.
- * @param {Activity[]} activities
- * @returns {string}
  */
-function buildCalendarHTML(activities) {
+function buildCalendarHTML(activities: Activity[]): string {
     if (activities.length === 0) return '<p style="color:var(--text-secondary)">No rides to display.</p>';
 
     // Build a map of ISO date string -> distance in metres
-    /** @type {Map<string, number>} */
-    const rideByDate = new Map();
+    const rideByDate = new Map<string, number>();
     activities.forEach(a => {
         if (!a.start_date_local) return;
         const dateKey = a.start_date_local.slice(0, 10); // 'YYYY-MM-DD'
@@ -626,10 +636,10 @@ function buildCalendarHTML(activities) {
     const maxDist = Math.max(...rideByDate.values());
 
     // Collect weeks of cells
-    const weeks = [];
-    let week = [];
+    const weeks: { key: string | null; dist: number }[][] = [];
+    let week: { key: string | null; dist: number }[] = [];
 
-    const _padDate = n => String(n).padStart(2, '0');
+    const _padDate = (n: number) => String(n).padStart(2, '0');
     const msPerDay  = 86400000;
     // Use setDate-based iteration anchored to startDay to avoid DST
     // millisecond drift (days are not always exactly 86400000ms).
@@ -653,23 +663,23 @@ function buildCalendarHTML(activities) {
     }
 
     // Build CSS gradient colour for a cell based on distance intensity
-    const cellStyle = (dist) => {
+    const cellStyle = (dist: number) => {
         if (dist === 0) return ''; // uses CSS default
         const intensity = dist / maxDist; // 0.0 - 1.0
         return `style="background:var(--gradient-to);opacity:${(0.2 + intensity * 0.8).toFixed(2)}"`;
     };
 
-    const cellTitle = (key, dist) => {
+    const cellTitle = (key: string | null, dist: number) => {
         if (!key) return '';
         const label = dist > 0 ? `${key}: ${(dist / 1000).toFixed(1)} km` : key;
         return `data-tooltip="${label}" aria-label="${label}"`;
     };
 
     // Month labels: record which week each month first appears in
-    const monthLabels = new Array(weeks.length).fill('');
+    const monthLabels: string[] = new Array(weeks.length).fill('');
     let lastMonth = -1;
     weeks.forEach((w, wi) => {
-        const firstValidCell = w.find(c => c.key);
+        const firstValidCell = w.find((c): c is { key: string; dist: number } => c.key !== null);
         if (firstValidCell) {
             const m = new Date(firstValidCell.key + 'T00:00:00').getMonth();
             if (m !== lastMonth) {
@@ -721,9 +731,8 @@ function buildCalendarHTML(activities) {
 
 /**
  * Switch to a named view mode and persist the preference.
- * @param {'card'|'table'|'heatmap'} mode
  */
-function switchView(mode) {
+function switchView(mode: 'card' | 'table' | 'heatmap') {
     // Show/hide sections
     elements.activities.style.display  = mode === 'card'    ? 'grid'  : 'none';
     elements.tableView.style.display   = mode === 'table'   ? 'block' : 'none';
@@ -762,16 +771,14 @@ const memoCache = {
 /**
  * Decode a Google encoded polyline string into an array of [lat, lng] pairs.
  * Algorithm: https://developers.google.com/maps/documentation/utilities/polylinealgorithm
- * @param {string} encoded
- * @returns {[number, number][]}
  */
-function decodePolyline(encoded) {
-    const result = [];
+function decodePolyline(encoded: string): [number, number][] {
+    const result: [number, number][] = [];
     let index = 0, lat = 0, lng = 0;
     while (index < encoded.length) {
         let shift = 0, result_val = 0, b;
         do {
-            b = encoded.codePointAt(index++) - 63;
+            b = encoded.codePointAt(index++)! - 63;
             result_val |= (b & 0x1f) << shift;
             shift += 5;
         } while (b >= 0x20);
@@ -779,7 +786,7 @@ function decodePolyline(encoded) {
 
         shift = 0; result_val = 0;
         do {
-            b = encoded.codePointAt(index++) - 63;
+            b = encoded.codePointAt(index++)! - 63;
             result_val |= (b & 0x1f) << shift;
             shift += 5;
         } while (b >= 0x20);
@@ -791,8 +798,8 @@ function decodePolyline(encoded) {
 }
 
 // Memoized formatting functions
-function formatDuration(seconds) {
-    if (seconds === undefined || seconds === null) return 'N/A';
+function formatDuration(seconds: number | undefined) {
+    if (seconds === undefined) return 'N/A';
     const cacheKey = seconds.toString();
     if (memoCache.formatDuration.has(cacheKey)) return memoCache.formatDuration.get(cacheKey);
     const h = Math.floor(seconds / 3600);
@@ -803,14 +810,14 @@ function formatDuration(seconds) {
     return result;
 }
 
-function formatDate(dateStr) {
+function formatDate(dateStr: string | undefined) {
     if (!dateStr) return '';
     if (memoCache.formatDate.has(dateStr)) return memoCache.formatDate.get(dateStr);
     const date = new Date(dateStr);
     const day = date.getDate();
     const month = date.toLocaleString('default', { month: 'long' });
     const year = date.getFullYear();
-    const daySuffix = (d) => {
+    const daySuffix = (d: number) => {
         if (d > 3 && d < 21) return 'th';
         switch (d % 10) {
             case 1: return 'st';
@@ -824,7 +831,7 @@ function formatDate(dateStr) {
     return result;
 }
 
-function calcSpeed(distance, moving_time) {
+function calcSpeed(distance: number | undefined, moving_time: number | undefined) {
     // distance in meters, moving_time in seconds
     if (!distance || !moving_time) return 'N/A';
     const cacheKey = `${distance}-${moving_time}`;
@@ -835,10 +842,8 @@ function calcSpeed(distance, moving_time) {
     return result;
 }
 
-/** @type {import('leaflet').Map|null} */
-let leafletMap = null;
-/** @type {import('leaflet').LayerGroup|null} */
-let routeLayerGroup = null;
+let leafletMap: LeafletMap | null = null;
+let routeLayerGroup: LeafletLayerGroup | null = null;
 
 // ---------------------------------------------------------------------------
 // Boot
@@ -847,8 +852,8 @@ let routeLayerGroup = null;
 try {
     const res = await fetch('./challenges.json');
     if (!res.ok) throw new Error(`Failed to load challenges: ${res.status}`);
-    const json = await res.json();
-    CHALLENGES = Array.isArray(json) ? json : [];
+    const json: unknown = await res.json();
+    CHALLENGES = Array.isArray(json) ? json as Challenge[] : [];
 } catch (err) {
     console.error('Could not load challenges.json:', err);
     CHALLENGES = [];

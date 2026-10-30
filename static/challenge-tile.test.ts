@@ -8,17 +8,19 @@ describe('createChallengeTile', () => {
         ["St. Paul's & London's Views", 'Cycle to the protected viewpoints.'],
         ['"><img src=x onerror=alert(1)>', '</p><script>alert(1)</script><p>']
     ])('keeps name %s and description as text, not markup', (name, description) => {
-        const fields = {
+        const fields: Record<string, {textContent: string}> = {
             '.challenge-tile__name': {textContent: ''},
             '.challenge-tile__description': {textContent: ''},
             '.challenge-tile__progress-pct': {textContent: ''}
         };
         const tile = {
-            style: {},
-            dataset: {},
+            type: '',
+            className: '',
+            style: {background: ''},
+            dataset: {slug: ''},
             innerHTML: '',
             setAttribute: vi.fn(),
-            querySelector: vi.fn(selector => fields[selector])
+            querySelector: vi.fn((selector: string) => fields[selector])
         };
         const createElement = vi.fn(() => tile);
         vi.stubGlobal('document', {createElement});
