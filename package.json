@@ -6,8 +6,10 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "build:frontend": "tsc -p tsconfig.frontend.json && cp dist/frontend/script.js dist/frontend/challenge-tile.js static/",
     "fetch-activities": "tsc && node dist/fetch-activities.js",
-    "test": "vitest run"
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.frontend.json --noEmit",
+    "test": "vitest run --exclude '**/dist/**'"
   },
   "keywords": [
     "strava",

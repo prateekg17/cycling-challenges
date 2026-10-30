@@ -1,9 +1,13 @@
 /**
  * Create a challenge tile without interpreting configuration text as HTML.
- * @param {{slug: string, name: string, description: string, gradient: string[], targetRideCount: number}} challenge
- * @returns {HTMLButtonElement}
  */
-export function createChallengeTile(challenge) {
+export function createChallengeTile(challenge: {
+    slug: string;
+    name: string;
+    description: string;
+    gradient: string[];
+    targetRideCount: number;
+}): HTMLButtonElement {
     const tile = document.createElement('button');
     tile.type = 'button';
     tile.className = 'challenge-tile';
@@ -21,8 +25,8 @@ export function createChallengeTile(challenge) {
             <span class="challenge-tile__progress-pct"></span>
         </div>
     `;
-    tile.querySelector('.challenge-tile__name').textContent = challenge.name;
-    tile.querySelector('.challenge-tile__description').textContent = challenge.description;
-    tile.querySelector('.challenge-tile__progress-pct').textContent = `0 / ${challenge.targetRideCount} rides`;
+    tile.querySelector('.challenge-tile__name')!.textContent = challenge.name;
+    tile.querySelector('.challenge-tile__description')!.textContent = challenge.description;
+    tile.querySelector('.challenge-tile__progress-pct')!.textContent = `0 / ${challenge.targetRideCount} rides`;
     return tile;
 }

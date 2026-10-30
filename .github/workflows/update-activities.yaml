@@ -43,6 +43,9 @@ jobs:
           STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
           STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
         run: npm run fetch-activities
+
+      - name: Build frontend
+        run: npm run build:frontend
         
       - name: Upload site artifact
         uses: actions/upload-artifact@v7

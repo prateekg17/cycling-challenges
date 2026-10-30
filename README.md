@@ -35,7 +35,7 @@ The site features automated data fetching, parallel API calls, and an interactiv
 - **Concurrency control** prevents overlapping update/deploy runs
 
 ## Architecture
-- **Frontend**: Static HTML/CSS/JavaScript served via GitHub Pages
+- **Frontend**: Static HTML/CSS served via GitHub Pages, with browser modules authored in TypeScript
 - **Data Source**: Weekly GitHub Action fetches Strava data and generates a per-challenge activities JSON file
 - **Challenge Config**: `static/challenges.json` is the single source of truth - read by the backend fetcher and served to the frontend
 - **Deployment**: Automatic GitHub Pages deployment after data updates
@@ -83,6 +83,7 @@ The site features automated data fetching, parallel API calls, and an interactiv
 4. Fetch activities & build:
    ```sh
    npm run fetch-activities
+   npm run build:frontend
    ```
 5. Serve locally:
    ```sh
@@ -104,6 +105,7 @@ npx vitest
 
 ## Continuous Integration (CI)
 - **Workflow**: `.github/workflows/test.yaml` runs on pull requests (open, reopen, synchronize, label) and executes the Vitest suite.
+- **Type-checking**: CI runs `npm run typecheck` for backend, browser, and test TypeScript.
 - **Strava credentials not required** for tests (fetch is mocked).
 - **Scheduled fetch & deploy**: `.github/workflows/update-activities.yaml` handles weekly data refresh and Pages deployment.
 - **Page deployment artifact name**: `site-static` (contains the entire `static/` directory including `index.html`, images, `challenges.json`, and per-challenge activity JSON files).
@@ -160,9 +162,9 @@ To try the skill without changing challenge files, add **"Show the previews, but
 - `scripts/fetch-activities.ts` - Strava fetch & processing (ESM / NodeNext); reads `static/challenges.json` for per-challenge config
 - `scripts/fetch-activities.test.ts` - Unit tests (Vitest, mocked fetch)
 - `static/challenges.json` - Challenge config (single source of truth for both backend and frontend)
-- `static/` - Site assets (`index.html`, `css/` (seven CSS modules), `script.js`, per-challenge activity JSON files, images)
+- `static/` - Site assets (`index.html`, `css/` (seven CSS modules), TypeScript frontend sources, per-challenge activity JSON files, images). The deployment build generates the browser `.js` modules here; they are not committed.
 - `package.json` - Dependencies & scripts
-- `tsconfig.json` - TypeScript config (ES2022 target, NodeNext resolution)
+- `tsconfig.json`, `tsconfig.frontend.json` - TypeScript configs for Node and browser code (ES2022, NodeNext)
 
 ## Notes on ESM / NodeNext
 - Project uses `"type": "module"` and `"moduleResolution": "NodeNext"`.
