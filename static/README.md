@@ -10,3 +10,7 @@ This directory contains the static site for Prateek's Cycling Challenges.
 - Other assets (images, etc.)
 
 The site is automatically deployed to GitHub Pages when the activities data is updated.
+
+Run `npm run build:frontend` from the repository root to generate the deployable site
+in `dist/site/`, then serve that directory for local previews. Rebuild after edits.
+Generated JavaScript stays outside this source directory so tests use TypeScript sources.

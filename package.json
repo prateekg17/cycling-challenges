@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "build:frontend": "tsc -p tsconfig.frontend.json && cp dist/frontend/script.js dist/frontend/challenge-tile.js static/",
+    "build:frontend": "tsc -p tsconfig.frontend.json && node scripts/prepare-site.ts",
     "fetch-activities": "tsc && node dist/fetch-activities.js",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.frontend.json --noEmit",
     "test": "vitest run --exclude '**/dist/**'"
